@@ -3,7 +3,6 @@
 namespace App\Libraries\SoilClassification\Granulometry\Classifiers;
 
 use App\Libraries\PointInPolygon;
-use App\Libraries\SoilClassification\Contracts\GranulometryClassifierInterface;
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResult;
 use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Libraries\SoilClassification\Services\TernaryDiagramService;
@@ -11,7 +10,7 @@ use App\Libraries\SoilClassification\Services\StandardRequirementsService;
 use App\Models\Granulometry;
 use App\Services\GeometryService;
 
-abstract class GranulometryClassifier //implements GranulometryClassifierInterface
+abstract class GranulometryClassifier
 {
     public function __construct(
         protected GranulometryService $granulometryService,
@@ -21,50 +20,7 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
     ) {}
 
 
-    public function classify_____(Granulometry $granulometry): GranulometryClassificationResult
-    {
-        $errors = $this->granulometryService->validateGranulometry($granulometry);
-        if (!empty($errors)) {
-            throw new \InvalidArgumentException('Invalid granulometry data: ' . implode(', ', $errors));
-        }
 
-        $normalizationApplied = false;
-        $normalizationFactor = 1.0;
-
-        $ternaryCoordinates = $this->getTernaryCoordinatesOrder($granulometry);
-        if (
-            $this->granulometryService->hasCoarseFraction($granulometry) ||
-            $this->granulometryService->hasVeryCoarseFraction($granulometry)
-        ) {
-            $total = array_sum($ternaryCoordinates);
-            if ($total > 0) {
-                $normalizationFactor = 100 / $total;
-                $normalizationApplied = true;
-            }
-        }
-        $ternaryCoordinates = array_map(fn($value) => $value * $normalizationFactor, $ternaryCoordinates);
-        [$cartesianX, $cartesianY] = $this->geometryService->ternaryToCartesian($ternaryCoordinates);
-
-        $soilType = $this->ternaryDiagramService->findSoilType(
-            $cartesianX,
-            $cartesianY,
-            $this->getTernaryDiagram()
-        );
-
-        if (!$soilType) {
-            throw new \RuntimeException($this->getClassificationErrorMessage($granulometry));
-        }
-
-        $soilName = $this->buildSoilName($soilType['name'], $granulometry);
-
-        return new GranulometryClassificationResult(
-            soilType: $soilName,
-            standardInfo: $this->getStandardInfo(),
-            // color: $soilType['color'],
-            // metadata: $this->buildMetadata($granulometry, $soilType)
-            metadata: $this->buildMetadata($granulometry, $normalizationApplied, $normalizationFactor, $ternaryCoordinates)
-        );
-    }
 
     public function classify(Granulometry $granulometry): GranulometryClassificationResult
     {
@@ -74,10 +30,10 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
         }
 
 
-        $ternaryCoordinates = $this->prepareTernaryCoordinates($granulometry);
+        $ternaryCoordinatesData = $this->processTernaryCoordinates($granulometry);
 
 
-        [$cartesianX, $cartesianY] = $this->geometryService->ternaryToCartesian($ternaryCoordinates['coordinates']);
+        [$cartesianX, $cartesianY] = $this->geometryService->ternaryToCartesian($ternaryCoordinatesData['coordinates']);
 
         $primaryDomain = $this->ternaryDiagramService->findSoilType(
             $cartesianX,
@@ -91,8 +47,10 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
 
         if ($this->requiresSecondaryAnalysis($primaryDomain)) {
             $soilType = $this->performSecondaryAnalysis($granulometry, $primaryDomain);
+            $soilName = $soilType['name'];
         } else {
             $soilType = $primaryDomain;
+            $soilName = $this->buildSoilName($soilType['name'], $granulometry);
         }
 
         $metadata = [
@@ -105,18 +63,23 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
             'fine' => $granulometry->clay + $granulometry->silt,
             'granulometric_class' => $this->granulometryService->getGranulometricClass($granulometry),
             'normalization' => [
-                'applied' => $ternaryCoordinates['normalization_applied'],
-                'factor' => round($ternaryCoordinates['normalization_factor'], 4),
-                'normalized_coordinates' => array_map(fn($coord) => round($coord, 2), $ternaryCoordinates['coordinates'])
+                'applied' => $ternaryCoordinatesData['normalization_applied'],
+                'factor' => round($ternaryCoordinatesData['normalization_factor'], 4),
+                'normalized_coordinates' => array_map(fn($coord) => round($coord, 2), $ternaryCoordinatesData['coordinates'])
             ]
 
         ];
 
 
         return new GranulometryClassificationResult(
-            soilType: $soilType['name'],
+            soilType: $soilName,
             standardInfo: $this->getStandardInfo(),
-            metadata: $metadata
+            metadata: $this->buildMetadata(
+                $granulometry,
+                $ternaryCoordinatesData['normalization_applied'],
+                $ternaryCoordinatesData['normalization_factor'],
+                $ternaryCoordinatesData['coordinates']
+            )
         );
     }
 
@@ -152,7 +115,6 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
         );
     }
 
-    // abstract protected function prepareTernaryCoordinates(Granulometry $granulometry): array;
 
 
 
@@ -179,9 +141,9 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
 
     abstract protected function getRequiredTernaryFractions(): array;
 
-    abstract protected function getTernaryCoordinatesOrder(Granulometry $granulometry): array;
+    abstract protected function getCoordinateValues(Granulometry $granulometry): array;
 
-    protected function getFractions(Granulometry $granulometry, array $fractions): array
+    protected function extractFractions(Granulometry $granulometry, array $fractions): array
     {
         $values = [];
         foreach ($fractions as $fraction) {
@@ -190,16 +152,16 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
         return $values;
     }
 
-    protected function prepareTernaryCoordinates(Granulometry $granulometry): array
+    protected function processTernaryCoordinates(Granulometry $granulometry): array
     {
         $requiredFractions = $this->getRequiredTernaryFractions();
 
-        $needsNormalization = $this->requiresNormalization(
+        $needsNormalization = $this->needsNormalization(
             $granulometry,
             $requiredFractions
         );
 
-        $coordinates = $this->getTernaryCoordinatesOrder($granulometry);
+        $coordinates = $this->getCoordinateValues($granulometry);
 
         if ($needsNormalization) {
             $total = array_sum($coordinates);
@@ -211,7 +173,7 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
         return $this->buildSimpleCoordinatesResult($coordinates);
     }
 
-    protected function requiresNormalization(
+    protected function needsNormalization(
         Granulometry $granulometry,
         array $requiredFractions
     ): bool {
@@ -255,49 +217,7 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
         ];
     }
 
-    // protected function normalizeFractions(Granulometry $granulometry): array
-    // {
-    //     $clay = $granulometry->clay ?? 0;
-    //     $silt = $granulometry->silt ?? 0;
-    //     $sand = $granulometry->sand ?? 0;
-    //     $gravel = $granulometry->gravel ?? 0;
-    //     $cobble = $granulometry->cobble ?? 0;
-    //     $boulder = $granulometry->boulder ?? 0;
 
-    //     $fineTotal = $clay + $silt + $sand;
-
-    //     $coarseTotal = $gravel + $cobble + $boulder;
-
-    //     // Dacă nu avem fracțiuni grosiere, returnează valorile originale
-    //     if ($coarseTotal == 0 || $fineTotal == 0) {
-    //         return [
-    //             'clay' => $clay,
-    //             'silt' => $silt,
-    //             'sand' => $sand,
-    //             'gravel' => $gravel,
-    //             'cobble' => $cobble,
-    //             'boulder' => $boulder,
-    //             'normalization_applied' => false,
-    //             'original_fine_total' => $fineTotal
-    //         ];
-    //     }
-
-    //     // Normalizează fracțiunile fine la 100%
-    //     $normalizationFactor = 100 / $fineTotal;
-
-    //     return [
-    //         'clay' => $clay * $normalizationFactor,
-    //         'silt' => $silt * $normalizationFactor,
-    //         'sand' => $sand * $normalizationFactor,
-    //         'gravel' => $gravel, // Păstrăm originalele pentru metadata
-    //         'cobble' => $cobble,
-    //         'boulder' => $boulder,
-    //         'normalization_applied' => true,
-    //         'normalization_factor' => $normalizationFactor,
-    //         'original_fine_total' => $fineTotal,
-    //         'coarse_total' => $coarseTotal
-    //     ];
-    // }
 
     public function buildSoilName(string $ternaryName, Granulometry $granulometry): string
     {
@@ -342,15 +262,6 @@ abstract class GranulometryClassifier //implements GranulometryClassifierInterfa
             'gravel' => $granulometry->gravel,
             'cobble' => $granulometry->cobble,
             'boulder' => $granulometry->boulder,
-            // 'soil_fractions' => [
-            //     'clay' => $granulometry->clay,
-            //     'sand' => $granulometry->sand,
-            //     'silt' => $granulometry->silt,
-            //     'gravel' => $granulometry->gravel,
-            //     'cobble' => $granulometry->cobble,
-            //     'boulder' => $granulometry->boulder
-            // ],
-            // 'classification_method' => $this->getClassificationMethod(),
             'granulometric_class' => $this->granulometryService->getGranulometricClass($granulometry)
         ];
 

@@ -438,7 +438,7 @@ class SampleController extends BaseController
         $granulometryService = new GranulometryService();
 
         // $soilIdentifier = SoilClassificationFactory::granulometry($sample, $system);
-        $factory = new GranulometryClassificationFactory($granulometryService);
+        $factory = new GranulometryClassificationFactory();
         $granulometry = $sample->granulometry;
         // $soilIdentifier = $factory->create($system);
 

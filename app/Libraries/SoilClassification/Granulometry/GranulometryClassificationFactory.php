@@ -18,12 +18,15 @@ use App\Services\GeometryService;
  */
 class GranulometryClassificationFactory
 {
-    private GranulometryService $granulometryService;
+    // private GranulometryService $granulometryService;
     private array $classifiers = [];
 
-    public function __construct(GranulometryService $granulometryService)
+    public function __construct(
+        // GranulometryService $granulometryService,
+
+    )
     {
-        $this->granulometryService = $granulometryService;
+        // $this->granulometryService = $granulometryService;
         $this->registerClassifiers();
     }
 
@@ -82,7 +85,8 @@ class GranulometryClassificationFactory
         $this->classifiers = [
             'stas_1243_1988' => function () {
                 return new STAS_1243_1988GranulometryClassifier(
-                    $this->granulometryService,
+                    // $this->granulometryService,
+                    app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
                     app(GeometryService::class)
@@ -90,7 +94,7 @@ class GranulometryClassificationFactory
             },
             'np_074_2022' => function () {
                 return new NP_074_2022GranulometryClassifier(
-                    $this->granulometryService,
+                    app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
                     app(GeometryService::class)
@@ -99,7 +103,7 @@ class GranulometryClassificationFactory
             },
             'sr_en_iso_14688_2005' => function () {
                 return new SR_EN_ISO_14688_2005GranulometryClassifier(
-                    $this->granulometryService,
+                    app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
                     app(GeometryService::class)

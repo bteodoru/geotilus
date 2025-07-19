@@ -16,9 +16,9 @@ class STAS_1243_1988GranulometryClassifier extends GranulometryClassifier
         return ['silt', 'clay', 'sand'];
     }
 
-    protected function getTernaryCoordinatesOrder(Granulometry $granulometry): array
+    protected function getCoordinateValues(Granulometry $granulometry): array
     {
-        $fractions = $this->getFractions($granulometry, $this->getRequiredTernaryFractions());
+        $fractions = $this->extractFractions($granulometry, $this->getRequiredTernaryFractions());
         $coordinates = [
             $fractions['silt'],
             $fractions['clay'],
