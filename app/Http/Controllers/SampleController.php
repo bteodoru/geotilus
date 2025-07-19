@@ -458,6 +458,7 @@ class SampleController extends BaseController
         try {
             // $soil = $soilIdentifier->classify();
             $soilIdentifier = $factory->create($system);
+            // dd($granulometry->toArray());
             dd($soilIdentifier->classify($sample->granulometry));
             SoilType::updateOrCreate(
                 ['sample_id' => $request->sample],

@@ -3,6 +3,7 @@
 namespace App\Libraries\SoilClassification\Granulometry;
 
 use App\Libraries\SoilClassification\Contracts\GranulometryClassifierInterface;
+use App\Libraries\SoilClassification\Granulometry\Classifiers\GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\NP_074_2022GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\SR_EN_ISO_14688_2005GranulometryClassifier;
 use App\Libraries\SoilClassification\Services\GranulometryService;
@@ -29,7 +30,8 @@ class GranulometryClassificationFactory
     /**
      * Creează un clasificator pentru un standard specific
      */
-    public function create(string $standardCode): GranulometryClassifierInterface
+    public function create(string $standardCode): GranulometryClassifier
+    // public function create(string $standardCode): GranulometryClassifierInterface
     {
         if (!isset($this->classifiers[$standardCode])) {
             throw new \InvalidArgumentException("Unknown granulometry standard: {$standardCode}");

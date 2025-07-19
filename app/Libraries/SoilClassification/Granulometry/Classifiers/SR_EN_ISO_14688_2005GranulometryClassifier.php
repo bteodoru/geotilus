@@ -9,7 +9,72 @@ use App\Models\Granulometry;
 class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
 {
 
-    public function classify(Granulometry $granulometry): GranulometryClassificationResult
+    public function classify__(Granulometry $granulometry): GranulometryClassificationResult
+    {
+        $errors = $this->granulometryService->validateGranulometry($granulometry);
+        if (!empty($errors)) {
+            throw new \InvalidArgumentException('Invalid granulometry data: ' . implode(', ', $errors));
+        }
+
+
+        $ternaryCoordinates = $this->computeTernaryCoordinates($granulometry);
+
+
+        [$cartesianX, $cartesianY] = $this->geometryService->ternaryToCartesian($ternaryCoordinates['coordinates']);
+
+        $primaryDomain = $this->ternaryDiagramService->findSoilType(
+            $cartesianX,
+            $cartesianY,
+            $this->getTernaryDiagram()
+        );
+
+        if (!$primaryDomain) {
+            throw new \RuntimeException("Cannot determine soil type");
+        }
+
+        if ($this->requiresSecondaryAnalysis($primaryDomain)) {
+            $soilType = $this->performSecondaryAnalysis($granulometry, $primaryDomain);
+        } else {
+            $soilType = $primaryDomain;
+        }
+
+        $metadata = [
+            'clay' => $granulometry->clay,
+            'sand' => $granulometry->sand,
+            'silt' => $granulometry->silt,
+            'gravel' => $granulometry->gravel,
+            'cobble' => $granulometry->cobble,
+            'boulder' => $granulometry->boulder,
+            'fine' => $granulometry->clay + $granulometry->silt,
+            'granulometric_class' => $this->granulometryService->getGranulometricClass($granulometry),
+            'normalization' => [
+                'applied' => $ternaryCoordinates['normalization_applied'],
+                'factor' => round($ternaryCoordinates['normalization_factor'], 4),
+                'normalized_coordinates' => array_map(fn($coord) => round($coord, 2), $ternaryCoordinates['coordinates'])
+            ]
+
+        ];
+
+        // if ($normalizationApplied) {
+        //     $metadata['normalization'] = [
+        //         'applied' => true,
+        //         'factor' => round($normalizationFactor, 4),
+        //         'normalized_coordinates' => array_map(fn($coord) => round($coord, 2), $ternaryCoordinates)
+        //     ];
+        // } else {
+        //     $metadata['normalization'] = ['applied' => false];
+        // }
+
+
+
+        return new GranulometryClassificationResult(
+            soilType: $soilType['name'],
+            standardInfo: $this->getStandardInfo(),
+            metadata: $metadata
+        );
+    }
+
+    public function classify_(Granulometry $granulometry): GranulometryClassificationResult
     {
         $errors = $this->granulometryService->validateGranulometry($granulometry);
         if (!empty($errors)) {
@@ -81,39 +146,9 @@ class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
         );
     }
 
-    private function requiresSecondaryAnalysis(array $primaryResult): bool
-    {
-        return isset($primaryResult['soils']) && count($primaryResult['soils']) > 1;
-    }
 
-    private function performSecondaryAnalysis(Granulometry $granulometry, array $primaryDomain): array
-    {
-        $fine = $granulometry->clay + $granulometry->silt;
-        $clay = $granulometry->clay;
 
-        foreach ($primaryDomain['soils'] as $soilCode => $soilData) {
-
-            if (!isset($soilData['points'])) {
-                continue; // Skip domenii fără puncte secundare
-            }
-
-            $result = $this->geometryService->pointInPolygon([$fine, $clay], $soilData['points']);
-
-            if ($result === PointInPolygon::INSIDE || $result === PointInPolygon::ON_BOUNDARY) {
-                return [
-                    'code' => $soilCode,
-                    'name' => $soilData['name'],
-                    'points' => $soilData['points']
-                ];
-            }
-        }
-        throw new \RuntimeException(
-            "Point ({$fine}% fine, {$clay}% clay) not found in any secondary domain for primary domain: " .
-                ($primaryDomain['name'])
-        );
-    }
-
-    protected function buildMetadata(
+    protected function buildMetadata__(
         Granulometry $granulometry,
         bool $normalizationApplied,
         float $normalizationFactor,
@@ -149,20 +184,24 @@ class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
         return 'sr_en_iso_14688_2_two_stage_analysis';
     }
 
+    protected function getRequiredTernaryFractions(): array
+    {
+        return ['silt', 'clay', 'sand', 'gravel'];
+    }
+
     protected function getTernaryCoordinatesOrder(Granulometry $granulometry): array
     {
-        $clay = $granulometry->clay;
-        $silt = $granulometry->silt;
-        $sand = $granulometry->sand;
-        $fine = $clay + $silt;
-        $gravel = $granulometry->gravel;
 
-        return [
-            $fine,
-            $sand,
-            $gravel
+        $fractions = $this->getFractions($granulometry, $this->getRequiredTernaryFractions());
+        $coordinates = [
+            $fractions['silt'] + $fractions['clay'],
+            $fractions['sand'],
+            $fractions['gravel']
         ];
+
+        return $coordinates;
     }
+
 
 
 
