@@ -1,0 +1,131 @@
+<?php
+
+return [
+    'meta' => [
+        'name' => 'SR EN ISO 14688-2:2018',
+        'version' => '2018',
+        'country' => 'EU',
+        'description' => 'Investigaţii şi încercări geotehnice. Identificarea şi clasificarea pământurilor. Partea 2: Principii pentru o clasificare',
+    ],
+    'soils' => [
+        [
+            'code' => 'SiL',
+            'points' => [
+                [10, 0],
+                [10, 4],
+                [(4 + 0.73 * 20) / 0.73, 4],
+                [35, 0.73 * (35 - 20)],
+                [35, 0],
+                [10, 0],
+            ],
+            'plasticity' => 'redusă',
+            'name' => 'praf',
+            'color' => '#FDE272',
+            'labelOffset' => [0, 1],
+        ],
+        [
+            'code' => 'ClL-SiL',
+            'points' => [
+                [10, 4],
+                [10, 7],
+                [(7 + 0.73 * 20) / 0.73, 7],
+                [(4 + 0.73 * 20) / 0.73, 4],
+                [10, 4],
+            ],
+            'plasticity' => 'redusă',
+            'name' => 'argilă-praf',
+            'color' => '#8f6b29',
+        ],
+        [
+            'code' => 'ClL',
+            'points' => [
+                [(7 + 0.9 * 8) / 0.9, 7],
+                [35, 0.9 * (35 - 8)],
+                [35, 0.73 * (35 - 20)],
+                [(7 + 0.73 * 20) / 0.73, 7],
+                [(7 + 0.9 * 8) / 0.9, 7],
+            ],
+            'plasticity' => 'redusă',
+            'name' => 'argilă',
+            'color' => '#D7D3D0',
+        ],
+        [
+            'code' => 'SiM',
+            'points' => [
+                [35, 0],
+                [35, 0.73 * (35 - 20)],
+                [50, 0.73 * (50 - 20)],
+                [50, 0],
+                [35, 0],
+            ],
+            'plasticity' => 'medie',
+            'name' => 'praf',
+            'color' => '#FAC515',
+        ],
+        [
+            'code' => 'ClM',
+            'points' => [
+                [35, 0.73 * (35 - 20)],
+                [35, 0.9 * (35 - 8)],
+                [50, 0.9 * (50 - 8)],
+                [50, 0.73 * (50 - 20)],
+                [35, 0.73 * (35 - 20)],
+            ],
+            'plasticity' => 'medie',
+            'name' => 'argilă',
+            'color' => '#A9A29D',
+        ],
+        [
+            'code' => 'SiH',
+            'points' => [
+                [50, 0],
+                [50, 0.73 * (50 - 20)],
+                [70, 0.73 * (70 - 20)],
+                [70, 0],
+                [50, 0],
+            ],
+            'plasticity' => 'mare',
+            'name' => 'praf',
+            'color' => '#EAAA08',
+        ],
+        [
+            'code' => 'ClH',
+            'points' => [
+                [50, 0.73 * (50 - 20)],
+                [50, 0.9 * (50 - 8)],
+                [70, 0.9 * (70 - 8)],
+                [70, 0.73 * (70 - 20)],
+                [50, 0.73 * (50 - 20)],
+            ],
+            'plasticity' => 'mare',
+            'name' => 'argilă',
+            'color' => '#79716B',
+        ],
+        [
+            'code' => 'SiV',
+            'points' => [
+                [70, 0],
+                [70, 0.73 * (70 - 20)],
+                [$lim, 0.73 * ($lim - 20)],
+                [$lim, 0],
+                [70, 0],
+            ],
+            'plasticity' => 'foarte mare',
+            'name' => 'praf',
+            'color' => '#CA8504',
+        ],
+        [
+            'code' => 'ClV',
+            'points' => [
+                [70, 0.73 * (70 - 20)],
+                [70, 0.9 * (70 - 8)],
+                [$lim, 0.9 * ($lim - 8)],
+                [$lim, 0.73 * ($lim - 20)],
+                [70, 0.73 * (70 - 20)],
+            ],
+            'plasticity' => 'foarte mare',
+            'name' => 'argilă',
+            'color' => '#57534E',
+        ],
+    ]
+];
