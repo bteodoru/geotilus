@@ -59,7 +59,7 @@ class TernaryDiagramService
         ];
     }
 
-    public function processCoordinates(
+    public function prepareTernaryData(
         Granulometry $granulometry,
         array $requiredFractions,
         array $usedFractions
@@ -84,10 +84,7 @@ class TernaryDiagramService
         // );
     }
 
-    private function extractCoordinateValues(Granulometry $granulometry, array $fractions): array
-    {
-        return array_map(fn($fraction) => $granulometry->{$fraction} ?? 0, $fractions);
-    }
+
 
     private function shouldNormalize(Granulometry $granulometry, array $requiredFractions): bool
     {

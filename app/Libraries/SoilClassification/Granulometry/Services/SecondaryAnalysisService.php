@@ -8,7 +8,9 @@ use App\Services\GeometryService;
 
 class SecondaryAnalysisService
 {
-    public function run(Granulometry $granulometry, array $primarySoil, GeometryService $geometryService): array
+    public function __construct(private GeometryService $geometryService) {}
+
+    public function run(Granulometry $granulometry, array $primarySoil): array
     {
         $fine = $granulometry->clay + $granulometry->silt;
         $clay = $granulometry->clay;
@@ -18,7 +20,7 @@ class SecondaryAnalysisService
                 continue;
             }
 
-            $result = $geometryService->pointInPolygon([$fine, $clay], $soilData['points']);
+            $result = $this->geometryService->pointInPolygon([$fine, $clay], $soilData['points']);
 
             if ($result === PointInPolygon::INSIDE || $result === PointInPolygon::ON_BOUNDARY) {
                 return [

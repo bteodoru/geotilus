@@ -2,19 +2,17 @@
 
 namespace App\Libraries\SoilClassification\Granulometry;
 
-use App\Libraries\SoilClassification\Contracts\GranulometryClassifierInterface;
-use App\Libraries\SoilClassification\Granulometry\Classifiers\GranulometryClassifier;
+use App\Libraries\SoilClassification\Granulometry\GranulometryClassifier;
+use App\Libraries\SoilClassification\Granulometry\Classifiers\STAS_1243_1988GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\NP_074_2022GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\SR_EN_ISO_14688_2005GranulometryClassifier;
 use App\Libraries\SoilClassification\Services\GranulometryService;
-use App\Libraries\SoilClassification\Granulometry\Classifiers\STAS_1243_1988GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
 use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
 use App\Libraries\SoilClassification\Services\StandardRequirementsService;
 use App\Libraries\SoilClassification\Granulometry\Services\TernaryDiagramService;
-// use App\Libraries\SoilClassification\Services\TernaryDiagramService;
-use App\Models\Granulometry;
 use App\Services\GeometryService;
+use App\Models\Granulometry;
 
 /**
  * Factory pentru crearea clasificatorilor granulometrici

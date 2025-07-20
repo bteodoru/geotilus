@@ -2,8 +2,7 @@
 
 namespace App\Libraries\SoilClassification\Granulometry\Classifiers;
 
-use App\Libraries\PointInPolygon;
-use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResult;
+use App\Libraries\SoilClassification\Granulometry\GranulometryClassifier;
 use App\Models\Granulometry;
 
 class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier

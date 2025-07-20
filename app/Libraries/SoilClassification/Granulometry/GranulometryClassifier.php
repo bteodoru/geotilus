@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\SoilClassification\Granulometry\Classifiers;
+namespace App\Libraries\SoilClassification\Granulometry;
 
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResult;
 use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
@@ -24,8 +24,6 @@ abstract class GranulometryClassifier
 
     public function classify(Granulometry $granulometry): GranulometryClassificationResult
     {
-        $this->validateData($granulometry);
-
         $ternaryData = $this->processTernaryData($granulometry);
         $soil = $this->determineSoilType($ternaryData['coordinates']);
         $finalSoil = $this->analyzeSoil($granulometry, $soil);
@@ -33,17 +31,10 @@ abstract class GranulometryClassifier
         return $this->buildClassificationResult($granulometry, $finalSoil, $ternaryData);
     }
 
-    private function validateData(Granulometry $granulometry): void
-    {
-        $errors = $this->granulometryService->validateGranulometry($granulometry);
-        if (!empty($errors)) {
-            throw new \InvalidArgumentException('Invalid granulometry data: ' . implode(', ', $errors));
-        }
-    }
 
     private function processTernaryData(Granulometry $granulometry): array
     {
-        return $this->ternaryDiagramService->processCoordinates(
+        return $this->ternaryDiagramService->prepareTernaryData(
             $granulometry,
             $this->getRequiredTernaryFractions(),
             $this->getCoordinateValues($granulometry)
@@ -69,7 +60,7 @@ abstract class GranulometryClassifier
     private function analyzeSoil(Granulometry $granulometry, array $soil): array
     {
         if ($this->requiresSecondaryAnalysis($soil)) {
-            return $this->secondaryAnalysisService->run($granulometry, $soil, $this->geometryService);
+            return $this->secondaryAnalysisService->run($granulometry, $soil);
         }
 
         return $soil;
