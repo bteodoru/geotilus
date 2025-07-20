@@ -18,14 +18,14 @@ class NP_074_2022GranulometryClassifier extends GranulometryClassifier
 
     protected function getCoordinateValues(Granulometry $granulometry): array
     {
-        $fractions = $this->extractFractions($granulometry, $this->getRequiredTernaryFractions());
-        $coordinates = [
+        $fractions = $this->granulometryService->extractFractions($granulometry, $this->getRequiredTernaryFractions());
+        $usedFractions = [
             $fractions['silt'],
             $fractions['clay'],
             $fractions['sand']
         ];
 
-        return $coordinates;
+        return $usedFractions;
     }
 
     public function getStandardInfo(): array

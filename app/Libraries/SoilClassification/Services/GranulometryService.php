@@ -176,6 +176,15 @@ class GranulometryService
         return 'mixed';
     }
 
+    public function extractFractions(Granulometry $granulometry, array $fractions): array
+    {
+        $values = [];
+        foreach ($fractions as $fraction) {
+            $values[$fraction] = $granulometry->{$fraction} ?? 0;
+        }
+        return $values;
+    }
+
     /**
      * Determină fracțiunea majoritară dintr-o categorie
      * 

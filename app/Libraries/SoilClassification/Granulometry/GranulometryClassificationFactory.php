@@ -8,8 +8,11 @@ use App\Libraries\SoilClassification\Granulometry\Classifiers\NP_074_2022Granulo
 use App\Libraries\SoilClassification\Granulometry\Classifiers\SR_EN_ISO_14688_2005GranulometryClassifier;
 use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\STAS_1243_1988GranulometryClassifier;
+use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
+use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
 use App\Libraries\SoilClassification\Services\StandardRequirementsService;
-use App\Libraries\SoilClassification\Services\TernaryDiagramService;
+use App\Libraries\SoilClassification\Granulometry\Services\TernaryDiagramService;
+// use App\Libraries\SoilClassification\Services\TernaryDiagramService;
 use App\Models\Granulometry;
 use App\Services\GeometryService;
 
@@ -89,7 +92,9 @@ class GranulometryClassificationFactory
                     app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
-                    app(GeometryService::class)
+                    app(GeometryService::class),
+                    app(SecondaryAnalysisService::class),
+                    app(SoilNameService::class)
                 );
             },
             'np_074_2022' => function () {
@@ -97,7 +102,10 @@ class GranulometryClassificationFactory
                     app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
-                    app(GeometryService::class)
+                    app(GeometryService::class),
+                    app(SecondaryAnalysisService::class),
+                    app(SoilNameService::class)
+
 
                 );
             },
@@ -106,7 +114,10 @@ class GranulometryClassificationFactory
                     app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
-                    app(GeometryService::class)
+                    app(GeometryService::class),
+                    app(SecondaryAnalysisService::class),
+                    app(SoilNameService::class)
+
 
                 );
             },
