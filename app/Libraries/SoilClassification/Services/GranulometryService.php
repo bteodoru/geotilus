@@ -8,6 +8,45 @@ use App\Models\Granulometry;
 class GranulometryService
 {
 
+    private const COMPOSITE_FRACTIONS = [
+        'fine' => ['clay', 'silt'],
+        'coarse' => ['sand', 'gravel'],
+        'very_coarse' => ['cobble', 'boulder'],
+        'total_coarse' => ['sand', 'gravel', 'cobble', 'boulder']
+    ];
+
+    public function extractGranulometricFractions(Granulometry $granulometry, array $granulometricFractions): array
+    {
+        $result = [];
+
+        foreach ($granulometricFractions as $fractionName) {
+            if ($this->isCompositeFraction($fractionName)) {
+                $result[$fractionName] = $this->calculateCompositeFractionValue($granulometry, $fractionName);
+            } else {
+                $result[$fractionName] = $granulometry->{$fractionName} ?? 0;
+            }
+        }
+
+        return $result;
+    }
+
+    private function isCompositeFraction(string $fractionName): bool
+    {
+        return array_key_exists($fractionName, self::COMPOSITE_FRACTIONS);
+    }
+
+    private function calculateCompositeFractionValue(Granulometry $granulometry, string $compositeFractionName): float
+    {
+        $components = self::COMPOSITE_FRACTIONS[$compositeFractionName];
+        $totalValue = 0;
+
+        foreach ($components as $component) {
+            $totalValue += $granulometry->{$component} ?? 0;
+        }
+
+        return $totalValue;
+    }
+
     public function getGranulometricClass(Granulometry $granulometry): string
     {
         $veryCoarseContent = ($granulometry->cobble ?? 0) + ($granulometry->boulder ?? 0);

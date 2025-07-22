@@ -46,6 +46,7 @@ class GeometryService
      */
     public function ternaryToCartesian(array $ternaryCoordinates): array
     {
+        $ternaryCoordinates = array_values($ternaryCoordinates);
         if (count($ternaryCoordinates) !== 3) {
             throw new \InvalidArgumentException('Ternary coordinates must have exactly 3 components');
         }

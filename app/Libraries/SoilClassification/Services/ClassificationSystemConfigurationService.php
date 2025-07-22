@@ -104,26 +104,26 @@ class ClassificationSystemConfigurationService
             if (isset($supportedCriteria[$criterionName])) {
                 $criterionConfig = $supportedCriteria[$criterionName];
 
-                foreach ($criterionConfig['available_methods'] as $methodName) {
-                    $availableImplementations[$systemCode] = [
-                        'code' => $systemCode,
-                        'name' => $systemConfig['system_info']['name'],
-                        'country' => $systemConfig['system_info']['country'],
-                        'version' => $systemConfig['system_info']['version'],
-                        'criterion_name' => $criterionName,
-                        'method_name' => $methodName,
-                        'is_primary_method' => ($methodName === $criterionConfig['primary_method']),
-                        'is_mandatory_criterion' => $criterionConfig['mandatory'],
-                        'full_identifier' => "{$systemCode}_{$criterionName}_{$methodName}"
-                        // 'system_code' => $systemCode,
-                        // 'system_name' => $systemConfig['system_info']['name'],
-                        // 'criterion_name' => $criterionName,
-                        // 'method_name' => $methodName,
-                        // 'is_primary_method' => ($methodName === $criterionConfig['primary_method']),
-                        // 'is_mandatory_criterion' => $criterionConfig['mandatory'],
-                        // 'full_identifier' => "{$systemCode}_{$criterionName}_{$methodName}"
-                    ];
-                }
+                // foreach ($criterionConfig['available_methods'] as $methodName) {
+                $availableImplementations[$systemCode] = [
+                    'code' => $systemCode,
+                    'name' => $systemConfig['system_info']['name'],
+                    'country' => $systemConfig['system_info']['country'],
+                    'version' => $systemConfig['system_info']['version'],
+                    'criterion_name' => $criterionName,
+                    // 'method_name' => $methodName,
+                    // 'is_primary_method' => ($methodName === $criterionConfig['primary_method']),
+                    // 'is_mandatory_criterion' => $criterionConfig['mandatory'],
+                    // 'full_identifier' => "{$systemCode}_{$criterionName}_{$methodName}"
+                    // 'system_code' => $systemCode,
+                    // 'system_name' => $systemConfig['system_info']['name'],
+                    // 'criterion_name' => $criterionName,
+                    // 'method_name' => $methodName,
+                    // 'is_primary_method' => ($methodName === $criterionConfig['primary_method']),
+                    // 'is_mandatory_criterion' => $criterionConfig['mandatory'],
+                    // 'full_identifier' => "{$systemCode}_{$criterionName}_{$methodName}"
+                ];
+                // }
             }
         }
 

@@ -62,18 +62,20 @@ class TernaryDiagramService
     public function prepareTernaryData(
         Granulometry $granulometry,
         array $requiredFractions,
-        array $usedFractions
+        // array $usedFractions
     ) //: CoordinateData
     {
         // $rawCoordinates = $this->extractCoordinateValues($granulometry, $requiredFractions);
 
         if ($this->shouldNormalize($granulometry, $requiredFractions)) {
-            return $this->normalizeCoordinates($usedFractions);
+            // return $this->normalizeCoordinates($usedFractions);
+            return $this->normalizeCoordinates($requiredFractions);
         }
 
         return [
             // 'coordinates' => $rawCoordinates,
-            'coordinates' => $usedFractions,
+            'coordinates' => $requiredFractions,
+            // 'coordinates' => $usedFractions,
             'normalizationApplied' => false,
             'normalizationFactor' => 1.0
         ];

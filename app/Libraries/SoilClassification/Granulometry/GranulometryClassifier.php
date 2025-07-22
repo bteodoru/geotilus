@@ -3,57 +3,49 @@
 namespace App\Libraries\SoilClassification\Granulometry;
 
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResult;
-use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
-use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
-use App\Libraries\SoilClassification\Granulometry\Services\TernaryDiagramService;
-use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
-use App\Libraries\SoilClassification\Services\GranulometryService;
-use App\Libraries\SoilClassification\Services\StandardRequirementsService;
+use App\Libraries\SoilClassification\Granulometry\Services\GranulometryClassificationServiceContainer;
+
 use App\Models\Granulometry;
-use App\Services\GeometryService;
 
 abstract class GranulometryClassifier
 {
     protected string $systemCode;
+
     public function __construct(
-        protected GranulometryService $granulometryService,
-        protected TernaryDiagramService $ternaryDiagramService,
-        protected StandardRequirementsService $requirementsService,
-        protected GeometryService $geometryService,
-        protected SecondaryAnalysisService $secondaryAnalysisService,
-        protected SoilNameService $soilNameService,
-        protected TernaryDiagramRepository $diagramRepository,
-        protected ClassificationSystemRepository $systemRepository
+        protected GranulometryClassificationServiceContainer $serviceContainer
     ) {}
 
     public function classify(Granulometry $granulometry): GranulometryClassificationResult
     {
         $ternaryData = $this->processTernaryData($granulometry);
         $soil = $this->determineSoilType($ternaryData['coordinates']);
-        $finalSoil = $this->analyzeSoil($granulometry, $soil);
 
-        return $this->buildClassificationResult($granulometry, $finalSoil, $ternaryData);
+        return $this->buildClassificationResult($granulometry, $soil, $ternaryData);
     }
 
 
-    private function processTernaryData(Granulometry $granulometry): array
+    public function processTernaryData(Granulometry $granulometry): array
     {
-        return $this->ternaryDiagramService->prepareTernaryData(
+        return $this->serviceContainer->ternaryDiagram()->prepareTernaryData(
             $granulometry,
-            $this->getRequiredTernaryFractions(),
-            $this->getCoordinateValues($granulometry)
+            $this->serviceContainer->granulometry()->extractGranulometricFractions($granulometry, $this->getRequiredTernaryFractions()),
         );
     }
 
-    private function determineSoilType(array $coordinates): array
+    private function getRequiredTernaryFractions(): array
     {
-        [$cartesianX, $cartesianY] = $this->geometryService->ternaryToCartesian($coordinates);
+        return $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->systemCode)['metadata']['axes_order'];
+    }
+
+    public function determineSoilType(array $coordinates): array
+    {
+        [$cartesianX, $cartesianY] = $this->serviceContainer->geometry()->ternaryToCartesian($coordinates);
         return $this->findPrimarySoil($cartesianX, $cartesianY, $this->getTernaryDiagram());
     }
 
     private function findPrimarySoil(float $x, float $y, array $domains): ?array
     {
-        $soil = $this->ternaryDiagramService->findSoil($x, $y, $domains);
+        $soil = $this->serviceContainer->ternaryDiagram()->findSoil($x, $y, $domains);
         if (!$soil) {
             throw new \RuntimeException("Cannot determine soil type.");
         }
@@ -61,21 +53,12 @@ abstract class GranulometryClassifier
         return $soil;
     }
 
-    private function analyzeSoil(Granulometry $granulometry, array $soil): array
-    {
-        if ($this->requiresSecondaryAnalysis($soil)) {
-            return $this->secondaryAnalysisService->run($granulometry, $soil);
-        }
-
-        return $soil;
-    }
-
-    private function buildClassificationResult(
+    public function buildClassificationResult(
         Granulometry $granulometry,
         array $soil,
-        array $ternaryCoordinatesData
+        array $ternaryCoordinatesData,
     ): GranulometryClassificationResult {
-        $soilName = $this->soilNameService->build($soil['name'], $granulometry);
+        $soilName = $this->serviceContainer->soilName()->build($soil['name'], $granulometry);
 
         return new GranulometryClassificationResult(
             soilType: $soilName,
@@ -87,11 +70,6 @@ abstract class GranulometryClassifier
                 $ternaryCoordinatesData['coordinates']
             )
         );
-    }
-
-    private function requiresSecondaryAnalysis(array $primaryResult): bool
-    {
-        return isset($primaryResult['soils']) && count($primaryResult['soils']) > 1;
     }
 
     protected function buildMetadata(Granulometry $granulometry, bool $normalizationApplied, float $normalizationFactor, array $finalCoordinates): array
@@ -111,7 +89,7 @@ abstract class GranulometryClassifier
             'gravel' => $granulometry->gravel,
             'cobble' => $granulometry->cobble,
             'boulder' => $granulometry->boulder,
-            'granulometric_class' => $this->granulometryService->getGranulometricClass($granulometry)
+            'granulometric_class' => $this->serviceContainer->granulometry()->getGranulometricClass($granulometry)
         ];
     }
 
@@ -128,15 +106,17 @@ abstract class GranulometryClassifier
         ];
     }
 
-    public function isApplicable(Granulometry $granulometry): bool
-    {
-        return $this->requirementsService->checkBasicApplicability($granulometry);
-    }
 
-    public function getRequiredFields(): array
-    {
-        return $this->requirementsService->getBasicRequirements();
-    }
+
+    // public function isApplicable(Granulometry $granulometry): bool
+    // {
+    //     return $this->requirementsService->checkBasicApplicability($granulometry);
+    // }
+
+    // public function getRequiredFields(): array
+    // {
+    //     return $this->requirementsService->getBasicRequirements();
+    // }
 
     public function getAvailableSoilTypes(): array
     {
@@ -145,19 +125,19 @@ abstract class GranulometryClassifier
 
     protected function getTernaryDiagram(): array
     {
-        $diagramConfig = $this->diagramRepository->getDiagramForSystem($this->systemCode);
+        $diagramConfig = $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->systemCode);
         return $diagramConfig['domains'];
     }
 
     public function getSystemInfo(): array
     {
-        $systemConfig = $this->systemRepository->getClassificationSystem($this->systemCode);
+        $systemConfig = $this->serviceContainer->systemRepository()->getClassificationSystem($this->systemCode);
         return $systemConfig['system_info'];
     }
 
-    abstract protected function getRequiredTernaryFractions(): array;
-
-    abstract protected function getCoordinateValues(Granulometry $granulometry): array;
+    // abstract protected function getRequiredTernaryFractions(): array;
+    // 
+    // abstract protected function getCoordinateValues(Granulometry $granulometry): array;
 
     // abstract protected function getTernaryDiagram(): array;
 

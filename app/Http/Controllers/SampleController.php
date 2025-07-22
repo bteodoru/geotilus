@@ -33,6 +33,7 @@ use App\Services\GeometryService;
 use App\Services\Granulometry\GranulometryAnalysisService;
 use App\Libraries\SoilClassification\Plasticity\Classifiers\CasagrandeClassifier;
 use App\Libraries\SoilClassification\Plasticity\PlasticityClassificationFactory;
+use App\Libraries\SoilClassification\Services\ClassificationSystemConfigurationService;
 use App\Libraries\SoilNaming\SoilNamingFactory;
 use App\Libraries\SoilNaming\SoilNamingResolver;
 
@@ -366,8 +367,10 @@ class SampleController extends BaseController
         // // $result = $classifier->classify($granulometry);
 
         // // Sau pentru sistemul specific
-        $classifier = $factory->create('sr_en_14688_2005');
+        $classifier = $factory->create('sr_en_iso_14688_2005');
+        $soilClassificationConfiguration = new ClassificationSystemConfigurationService();
         $availableIdentificationSystems = $factory->getApplicableSystems($granulometry);
+        // $availableIdentificationSystems = $soilClassificationConfiguration->getAvailableCriterionImplementations('granulometry');
         // $availableIdentificationSystems = $factory->getApplicableSystems();
 
         $result = $classifier->classify($granulometry);

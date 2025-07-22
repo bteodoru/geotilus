@@ -2,7 +2,7 @@
 
 return [
     'system_info' => [
-        'code' => 'sr_en_14688_2005',
+        'code' => 'sr_en_iso_14688_2005',
         'name' => 'SR EN ISO 14688-2',
         'version' => '2005',
         'country' => 'RO',

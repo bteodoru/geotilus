@@ -31,13 +31,4 @@ return [
         ]
     ],
 
-    'classification_rules' => [
-        'primary_criterion' => 'granulometry', // Criteriul principal
-        'hierarchy' => ['granulometry', 'plasticity', 'density'], // Ordinea de aplicare
-        'decision_tree' => [
-            // Reguli pentru când să aplici ce criteriu
-            'if_coarse_fraction_over_50' => 'use_granulometry_only',
-            'if_fine_fraction_over_50' => 'use_granulometry_and_plasticity',
-        ]
-    ]
 ];
