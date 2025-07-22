@@ -6,6 +6,7 @@ use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResu
 use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
 use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
 use App\Libraries\SoilClassification\Granulometry\Services\TernaryDiagramService;
+use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
 use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Libraries\SoilClassification\Services\StandardRequirementsService;
 use App\Models\Granulometry;
@@ -13,13 +14,16 @@ use App\Services\GeometryService;
 
 abstract class GranulometryClassifier
 {
+    protected string $systemCode;
     public function __construct(
         protected GranulometryService $granulometryService,
         protected TernaryDiagramService $ternaryDiagramService,
         protected StandardRequirementsService $requirementsService,
         protected GeometryService $geometryService,
         protected SecondaryAnalysisService $secondaryAnalysisService,
-        protected SoilNameService $soilNameService
+        protected SoilNameService $soilNameService,
+        protected TernaryDiagramRepository $diagramRepository,
+        protected ClassificationSystemRepository $systemRepository
     ) {}
 
     public function classify(Granulometry $granulometry): GranulometryClassificationResult
@@ -75,7 +79,7 @@ abstract class GranulometryClassifier
 
         return new GranulometryClassificationResult(
             soilType: $soilName,
-            standardInfo: $this->getStandardInfo(),
+            standardInfo: $this->getSystemInfo(),
             metadata: $this->buildMetadata(
                 $granulometry,
                 $ternaryCoordinatesData['normalizationApplied'],
@@ -139,11 +143,23 @@ abstract class GranulometryClassifier
         return array_keys($this->getTernaryDiagram());
     }
 
+    protected function getTernaryDiagram(): array
+    {
+        $diagramConfig = $this->diagramRepository->getDiagramForSystem($this->systemCode);
+        return $diagramConfig['domains'];
+    }
+
+    public function getSystemInfo(): array
+    {
+        $systemConfig = $this->systemRepository->getClassificationSystem($this->systemCode);
+        return $systemConfig['system_info'];
+    }
+
     abstract protected function getRequiredTernaryFractions(): array;
 
     abstract protected function getCoordinateValues(Granulometry $granulometry): array;
 
-    abstract protected function getTernaryDiagram(): array;
+    // abstract protected function getTernaryDiagram(): array;
 
-    abstract public function getStandardInfo(): array;
+    // abstract public function getSystemInfo(): array;
 }

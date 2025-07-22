@@ -189,6 +189,8 @@ class SampleController extends BaseController
     {
 
 
+
+
         // // Datele originale
         // $domains = [
         //     "Nisip" => [
@@ -350,42 +352,63 @@ class SampleController extends BaseController
         $sample = Sample::findOrFail($sampleId);
         $sample->load('granulometry', 'soilType');
 
-        // 1. SETUP-ul serviciilor (de obicei în ServiceProvider)
-        $granulometryService = new GranulometryService();
-        $factory = new GranulometryClassificationFactory($granulometryService);
+        // // 1. SETUP-ul serviciilor (de obicei în ServiceProvider)
+        // $granulometryService = new GranulometryService();
+        // $factory = new GranulometryClassificationFactory($granulometryService);
 
-        // 2. OBȚINEREA DATELOR - presupun că ai un Sample cu Granulometry
-        // $sample = Sample::with('granulometry')->find(1);
+        // // 2. OBȚINEREA DATELOR - presupun că ai un Sample cu Granulometry
+        // // $sample = Sample::with('granulometry')->find(1);
         $granulometry = $sample->granulometry;
+
+        // // Utilizare simplă
+        $factory = new GranulometryClassificationFactory();
+        // // $classifier = $factory->createSTAS();
+        // // $result = $classifier->classify($granulometry);
+
+        // // Sau pentru sistemul specific
+        $classifier = $factory->create('sr_en_14688_2005');
+        $availableIdentificationSystems = $factory->getApplicableSystems($granulometry);
+        // $availableIdentificationSystems = $factory->getApplicableSystems();
+
+        $result = $classifier->classify($granulometry);
+
+        // dd($availableIdentificationSystems, $result);
+
+        // Pentru cazuri avansate
+        // $classifier = $factory->createAdvanced(
+        //     'stas_1243_1988',
+        //     'granulometry',
+        //     'ternary_diagram'
+        // );
 
         // $test = new SoilNamingResolver();
 
         // $chartService = new CasagrandeChartService(new GeometryService());
-        $test = new SoilNamingFactory(new GranulometryClassificationFactory($granulometryService), new PlasticityClassificationFactory());
+        // $test = new SoilNamingFactory(new GranulometryClassificationFactory($granulometryService), new PlasticityClassificationFactory());
         // dd($test->create('sr_en_iso_14688_2018')->nameSoil($sample));
 
         // 3. VERIFICAREA STANDARDELOR APLICABILE (opțional)
-        $applicableStandards = $factory->getApplicableStandards($granulometry);
+        // $applicableStandards = $factory->getApplicableSystems($granulometry);
         // Returnează: ['stas_1243_1988' => ['name' => 'STAS 1243', 'version' => '1988', ...]]
         // dd($applicableStandards);
         // 4. CREAREA CLASIFICATORULUI pentru standardul dorit
-        $classifier_stas = $factory->create('stas_1243_1988');
+        // $classifier_stas = $factory->create('stas_1243_1988');
         // $classifier_np = $factory->create('np_074_2022');
-        $classifier_np = $factory->create('sr_en_iso_14688_2005');
-        $gs = new GeometryService;
-        $ccs = new CasagrandeChartService($gs);
-        $classifier = new CasagrandeClassifier($ccs);
+        // $classifier_np = $factory->create('sr_en_14688_2005');
+        // $gs = new GeometryService;
+        // $ccs = new CasagrandeChartService($gs);
+        // $classifier = new CasagrandeClassifier($ccs);
         // dd($classifier->classify($sample->plasticity));
 
-        try {
-            $result = $classifier->classify($sample->plasticity);
-            $response = $result->toArray();
+        // try {
+        //     $result = $classifier->classify($sample->plasticity);
+        //     $response = $result->toArray();
 
-            // return response()->json($response);
+        //     // return response()->json($response);
 
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        // } catch (\Exception $e) {
+        //     return response()->json(['error' => $e->getMessage()], 500);
+        // }
 
 
 
@@ -406,14 +429,14 @@ class SampleController extends BaseController
         // $granulometry = new GranulometryRule($sample, 'STAS_1243___1988');
         // $result = $granulometry->classify();
         // $classifier = new STAS_1243___1988($sample);
-        // dd($availableIdentificationSystems, $result);
+        // dd($sample);
 
         // $availableIdentificationSystems = app(SoilTypeIdentifier::class)->getAvailableSystems();
         // dd($availableIdentificationSystems);
-
+        // dd($sample);
         return Inertia::render('Sample', [
             'sample' => $sample,
-            'sample.availableIdentificationSystems' => $applicableStandards
+            'sample.availableIdentificationSystems' => $availableIdentificationSystems
         ]);
     }
 
@@ -459,7 +482,7 @@ class SampleController extends BaseController
             // $soil = $soilIdentifier->classify();
             $soilIdentifier = $factory->create($system);
             // dd($granulometry->toArray());
-            dd($soilIdentifier->classify($sample->granulometry));
+            // dd($soilIdentifier->classify($sample->granulometry));
             SoilType::updateOrCreate(
                 ['sample_id' => $request->sample],
                 [

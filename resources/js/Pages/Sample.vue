@@ -39,6 +39,7 @@
         <p v-if="sample.soil_type" class="font-semibold">{{ sample.soil_type.name }}</p>
         <p v-else class="italic text-gray-600 text-sm">fara denumire</p>
         <p>{{ sample.availableIdentificationSystems[sample.soil_type.method].name }}</p>
+        <!-- <p>{{ sample.availableIdentificationSystems[sample.soil_type.method].name }}</p> -->
         <!-- Card Section -->
         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
           <!-- Grid -->

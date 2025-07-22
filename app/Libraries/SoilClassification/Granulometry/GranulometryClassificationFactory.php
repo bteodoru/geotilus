@@ -11,8 +11,11 @@ use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisServ
 use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
 use App\Libraries\SoilClassification\Services\StandardRequirementsService;
 use App\Libraries\SoilClassification\Granulometry\Services\TernaryDiagramService;
+use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
+use App\Libraries\SoilClassification\Services\ClassificationSystemConfigurationService;
 use App\Services\GeometryService;
 use App\Models\Granulometry;
+use PhpParser\Node\Expr\Ternary;
 
 /**
  * Factory pentru crearea clasificatorilor granulometrici
@@ -63,7 +66,7 @@ class GranulometryClassificationFactory
     /**
      * Găsește standardele aplicabile pentru datele respective
      */
-    public function getApplicableStandards(Granulometry $granulometry): array
+    public function getApplicableSystems(Granulometry $granulometry): array
     {
         $applicable = [];
 
@@ -71,7 +74,7 @@ class GranulometryClassificationFactory
             $classifier = $classifierFactory();
 
             if ($classifier->isApplicable($granulometry)) {
-                $applicable[$code] = $classifier->getStandardInfo();
+                $applicable[$code] = $classifier->getSystemInfo();
             }
         }
 
@@ -92,7 +95,10 @@ class GranulometryClassificationFactory
                     app(StandardRequirementsService::class),
                     app(GeometryService::class),
                     app(SecondaryAnalysisService::class),
-                    app(SoilNameService::class)
+                    app(SoilNameService::class),
+                    app(TernaryDiagramRepository::class),
+                    app(ClassificationSystemRepository::class)
+                    // app(ClassificationSystemConfigurationService::class),
                 );
             },
             'np_074_2022' => function () {
@@ -102,19 +108,25 @@ class GranulometryClassificationFactory
                     app(StandardRequirementsService::class),
                     app(GeometryService::class),
                     app(SecondaryAnalysisService::class),
-                    app(SoilNameService::class)
+                    app(SoilNameService::class),
+                    app(TernaryDiagramRepository::class),
+                    app(ClassificationSystemRepository::class)
+                    // app(ClassificationSystemConfigurationService::class)
 
 
                 );
             },
-            'sr_en_iso_14688_2005' => function () {
+            'sr_en_14688_2005' => function () {
                 return new SR_EN_ISO_14688_2005GranulometryClassifier(
                     app(GranulometryService::class),
                     app(TernaryDiagramService::class),
                     app(StandardRequirementsService::class),
                     app(GeometryService::class),
                     app(SecondaryAnalysisService::class),
-                    app(SoilNameService::class)
+                    app(SoilNameService::class),
+                    app(TernaryDiagramRepository::class),
+                    app(ClassificationSystemRepository::class)
+                    // app(ClassificationSystemConfigurationService::class)
 
 
                 );
