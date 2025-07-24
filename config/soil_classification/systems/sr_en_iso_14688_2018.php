@@ -2,20 +2,20 @@
 
 return [
     'system_info' => [
-        'code' => 'np_074_2022',
-        'name' => 'NP 074/2022',
-        'version' => '2022',
+        'code' => 'sr_en_iso_14688_2018',
+        'name' => 'SR EN ISO 14688-2',
+        'version' => '2018',
         'country' => 'RO',
-        'organization' => 'Ministerul Dezvoltării, Lucrărilor Publice și Administrației',
-        'description' => 'Normativ pentru întocmirea documentațiilor geotehnice pentru construcții',
-        'scope' => 'Stabilește modalitatea de clasificare a pământurilor din punct de vedere granulometric, în cadrul documentațiilor geotehnice',
-        'publication_date' => '2023-01-20',
+        'organization' => 'Institutul Român de Standardizare',
+        'description' => 'Investigaţii şi încercări geotehnice. Identificarea şi clasificarea pământurilor. Partea 2: Principii pentru o clasificare',
+        'scope' => 'Definește metodele de clasificare și identificare a pământurilor pentru lucrări geotehnice',
+        'publication_date' => '2018-07-31',
         'status' => 'activ',
     ],
 
     'supported_classification_criteria' => [
         'granulometry' => [
-            'applicable_granulometric_classes' => ['fine'],
+            'applicable_granulometric_classes' => ['coarse', 'very_coarse'],
             'available_methods' => ['ternary_diagram'],
             'primary_method' => 'ternary_diagram',
             'mandatory' => true,

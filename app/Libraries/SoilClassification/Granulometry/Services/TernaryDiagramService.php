@@ -5,11 +5,11 @@ namespace App\Libraries\SoilClassification\Granulometry\Services;
 use App\Libraries\PointInPolygon;
 use App\Models\Granulometry;
 use App\Services\GeometryService;
-
+use App\Services\Granulometry\GranulometryAnalysisService;
 
 class TernaryDiagramService
 {
-    public function __construct(private GeometryService $geometryService) {}
+    public function __construct(private GeometryService $geometryService, private GranulometryAnalysisService $granulometryAnalysisService) {}
 
     public function findSoil(float $x, float $y, array $diagram): ?array
     {
@@ -66,7 +66,6 @@ class TernaryDiagramService
     ) //: CoordinateData
     {
         // $rawCoordinates = $this->extractCoordinateValues($granulometry, $requiredFractions);
-
         if ($this->shouldNormalize($granulometry, $requiredFractions)) {
             // return $this->normalizeCoordinates($usedFractions);
             return $this->normalizeCoordinates($requiredFractions);
@@ -91,8 +90,11 @@ class TernaryDiagramService
     private function shouldNormalize(Granulometry $granulometry, array $requiredFractions): bool
     {
         $allFractions = ['clay', 'silt', 'sand', 'gravel', 'cobble', 'boulder'];
-        $unusedFractions = array_diff($allFractions, $requiredFractions);
-
+        // dd($granulometry->toArray(), $requiredFractions, $allFractions);
+        // $r = $this->granulometryAnalysisService->expandGranulometricFractions($requiredFractions);
+        // dd($r);
+        $unusedFractions = array_diff($allFractions, $this->granulometryAnalysisService->expandGranulometricFractions($requiredFractions));
+        // dd($unusedFractions, $granulometry->toArray());
         foreach ($unusedFractions as $fraction) {
             if (($granulometry->{$fraction} ?? 0) > 0) {
                 return true;

@@ -15,4 +15,17 @@ class STAS_1243_1988GranulometryClassifier extends GranulometryClassifier
     {
         return 'stas_single_ternary_diagram';
     }
+
+    public function getGradationInformation(Granulometry $granulometry): ?string
+    {
+        $cu = $granulometry->cu;
+
+        if ($cu < 5) {
+            return 'foarte uniformă';
+        } elseif ($cu <= 15) {
+            return 'uniformă';
+        } else {
+            return 'neuniformă';
+        }
+    }
 }

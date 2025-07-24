@@ -15,19 +15,17 @@ return [
 
     'supported_classification_criteria' => [
         'granulometry' => [
+            'applicable_granulometric_classes' => ['fine', 'coarse', 'very_coarse'],
             'available_methods' => ['ternary_diagram'],
             'primary_method' => 'ternary_diagram',
-            'mandatory' => true,
         ],
         'plasticity' => [
             'available_methods' => ['consistency_limits'],
             'primary_method' => 'consistency_limits',
-            'mandatory' => false,
         ],
         'density' => [
             'available_methods' => ['relative_density'],
             'primary_method' => 'relative_density',
-            'mandatory' => false,
         ]
     ],
 

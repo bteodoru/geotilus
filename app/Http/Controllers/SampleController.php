@@ -33,6 +33,7 @@ use App\Services\GeometryService;
 use App\Services\Granulometry\GranulometryAnalysisService;
 use App\Libraries\SoilClassification\Plasticity\Classifiers\CasagrandeClassifier;
 use App\Libraries\SoilClassification\Plasticity\PlasticityClassificationFactory;
+use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
 use App\Libraries\SoilClassification\Services\ClassificationSystemConfigurationService;
 use App\Libraries\SoilNaming\SoilNamingFactory;
 use App\Libraries\SoilNaming\SoilNamingResolver;
@@ -360,6 +361,10 @@ class SampleController extends BaseController
         // // 2. OBȚINEREA DATELOR - presupun că ai un Sample cu Granulometry
         // // $sample = Sample::with('granulometry')->find(1);
         $granulometry = $sample->granulometry;
+        $classificationSystemsRepo = new ClassificationSystemRepository();
+        // $classificationSystemsRepo = new ClassificationSystemConfigurationService();
+        // dd($classificationSystemsRepo->getAvailableCriterionImplementations('granulometry'));
+        // dd($classificationSystemsRepo->getAvailableImplementations('granulometry'), $classificationSystemsRepo->getCriterionConfiguration('sr_en_iso_14688_2005', 'granulometry'));
 
         // // Utilizare simplă
         $factory = new GranulometryClassificationFactory();
@@ -367,13 +372,16 @@ class SampleController extends BaseController
         // // $result = $classifier->classify($granulometry);
 
         // // Sau pentru sistemul specific
-        $classifier = $factory->create('sr_en_iso_14688_2005');
+        $classifier = $factory->create('sr_en_iso_14688_2018');
         $soilClassificationConfiguration = new ClassificationSystemConfigurationService();
         $availableIdentificationSystems = $factory->getApplicableSystems($granulometry);
         // $availableIdentificationSystems = $soilClassificationConfiguration->getAvailableCriterionImplementations('granulometry');
         // $availableIdentificationSystems = $factory->getApplicableSystems();
 
-        $result = $classifier->classify($granulometry);
+        // $result = $classifier->classify($granulometry);
+        // $result = [];
+        // 
+        // dd($result, $classifier->getSupportedClasses(), $factory->getApplicableSystems($granulometry), $classifier->isApplicable($granulometry), $classificationSystemsRepo->allByCriterion('granulometry'));
 
         // dd($availableIdentificationSystems, $result);
 
@@ -439,7 +447,8 @@ class SampleController extends BaseController
         // dd($sample);
         return Inertia::render('Sample', [
             'sample' => $sample,
-            'sample.availableIdentificationSystems' => $availableIdentificationSystems
+            'sample.availableIdentificationSystems' => $availableIdentificationSystems,
+            // 'sample.conf' => $conf->allByCriterion('granulometry')
         ]);
     }
 
@@ -461,7 +470,8 @@ class SampleController extends BaseController
         // $granulometry->sample()->associate($sample);
         $sample = Sample::findOrFail($request->sample);
         // dd($sample->load('granulometry'), $system);
-        $granulometryService = new GranulometryService();
+        $granulometryService = new GranulometryAnalysisService();
+        // $granulometryService = new GranulometryService();
 
         // $soilIdentifier = SoilClassificationFactory::granulometry($sample, $system);
         $factory = new GranulometryClassificationFactory();

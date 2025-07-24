@@ -7,40 +7,20 @@ use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResu
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassifier;
 use App\Models\Granulometry;
 
-class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
+class SR_EN_ISO_14688_2018GranulometryClassifier extends GranulometryClassifier
 {
-    protected string $systemCode = 'sr_en_iso_14688_2005';
+    protected string $systemCode = 'sr_en_iso_14688_2018';
 
 
-    public function classify(Granulometry $granulometry): GranulometryClassificationResult
-    {
-        $ternaryData = $this->processTernaryData($granulometry);
-        $soil = $this->determineSoilType($ternaryData['coordinates']);
-        $finalSoil = $this->analyze($granulometry, $soil, $ternaryData['normalizationFactor']);
 
-        $soilName = $this->serviceContainer->soilName()
-            ->build($finalSoil['name'], $granulometry, $this->getRequiredTernaryFractions(), [50, 25]);
 
-        return new GranulometryClassificationResult(
-            soilType: $soilName,
-            standardInfo: $this->getSystemInfo(),
-            metadata: $this->buildMetadata(
-                $granulometry,
-                $ternaryData['normalizationApplied'],
-                $ternaryData['normalizationFactor'],
-                $ternaryData['coordinates']
-            )
-        );
-    }
-
-    private function analyze(Granulometry $granulometry, array $soil, float $normalizationFactor): array
+    private function analyze(Granulometry $granulometry, array $soil): array
     {
         if ($this->requiresSecondaryAnalysis($soil)) {
-            return $this->runSecondaryAnalysis($granulometry, $soil, $normalizationFactor);
+            return $this->runSecondaryAnalysis($granulometry, $soil);
         }
 
-
-        return $soil['soils'][array_key_first($soil['soils'])] ?? $soil;
+        return $soil;
     }
 
     private function requiresSecondaryAnalysis(array $primaryResult): bool
@@ -48,10 +28,10 @@ class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
         return isset($primaryResult['soils']) && count($primaryResult['soils']) > 1;
     }
 
-    public function runSecondaryAnalysis(Granulometry $granulometry, array $primarySoil, float $normalizationFactor): array
+    public function runSecondaryAnalysis(Granulometry $granulometry, array $primarySoil): array
     {
-        $fine = $normalizationFactor * ($granulometry->clay  + $granulometry->silt);
-        $clay = $normalizationFactor * $granulometry->clay;
+        $fine = $granulometry->clay + $granulometry->silt;
+        $clay = $granulometry->clay;
 
         foreach ($primarySoil['soils'] as $soilCode => $soilData) {
             if (!isset($soilData['points'])) {

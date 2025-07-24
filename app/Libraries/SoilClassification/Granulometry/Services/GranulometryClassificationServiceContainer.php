@@ -4,8 +4,10 @@ namespace App\Libraries\SoilClassification\Granulometry\Services;
 
 use App\Libraries\SoilClassification\Granulometry\TernaryDiagramRepository;
 use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
-use App\Libraries\SoilClassification\Services\GranulometryService;
+// use App\Libraries\SoilClassification\Services\GranulometryAnalysisService;
+// use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Services\GeometryService;
+use App\Services\Granulometry\GranulometryAnalysisService;
 
 /**
  * Service container specializat pentru operațiunile de clasificare granulometrică
@@ -15,7 +17,7 @@ use App\Services\GeometryService;
 class GranulometryClassificationServiceContainer
 {
     public function __construct(
-        private GranulometryService $granulometryService,
+        private GranulometryAnalysisService $granulometryService,
         private TernaryDiagramService $ternaryDiagramService,
         private GeometryService $geometryService,
         private SoilNameService $soilNameService,
@@ -24,7 +26,7 @@ class GranulometryClassificationServiceContainer
     ) {}
 
 
-    public function granulometry(): GranulometryService
+    public function granulometry(): GranulometryAnalysisService
     {
         return $this->granulometryService;
     }
@@ -60,7 +62,7 @@ class GranulometryClassificationServiceContainer
     public static function create(): self
     {
         return new self(
-            app(GranulometryService::class),
+            app(GranulometryAnalysisService::class),
             app(TernaryDiagramService::class),
             app(GeometryService::class),
             app(SoilNameService::class),
@@ -75,7 +77,7 @@ class GranulometryClassificationServiceContainer
     public function getServiceSummary(): array
     {
         return [
-            'data_processing' => [GranulometryService::class, TernaryDiagramService::class],
+            'data_processing' => [GranulometryAnalysisService::class, TernaryDiagramService::class],
             'geometric_operations' => [GeometryService::class],
             'naming_logic' => [SoilNameService::class],
             'data_access' => [TernaryDiagramRepository::class, ClassificationSystemRepository::class]

@@ -6,6 +6,7 @@ use App\Libraries\SoilClassification\Granulometry\GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\STAS_1243_1988GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\NP_074_2022GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Classifiers\SR_EN_ISO_14688_2005GranulometryClassifier;
+use App\Libraries\SoilClassification\Granulometry\Classifiers\SR_EN_ISO_14688_2018GranulometryClassifier;
 use App\Libraries\SoilClassification\Granulometry\Services\GranulometryClassificationServiceContainer;
 use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Libraries\SoilClassification\Granulometry\Services\SecondaryAnalysisService;
@@ -53,17 +54,17 @@ class GranulometryClassificationFactory
     /**
      * Returnează toate standardele disponibile
      */
-    public function getAvailableStandards(): array
-    {
-        $standards = [];
+    // public function getAvailableStandards(): array
+    // {
+    //     $standards = [];
 
-        foreach ($this->classifiers as $code => $classifierFactory) {
-            $classifier = $classifierFactory();
-            $standards[$code] = $classifier->getStandardInfo();
-        }
+    //     foreach ($this->classifiers as $code => $classifierFactory) {
+    //         $classifier = $classifierFactory();
+    //         $standards[$code] = $classifier->getStandardInfo();
+    //     }
 
-        return $standards;
-    }
+    //     return $standards;
+    // }
 
     /**
      * Găsește standardele aplicabile pentru datele respective
@@ -144,6 +145,9 @@ class GranulometryClassificationFactory
                 GranulometryClassificationServiceContainer::create()
             ),
             'sr_en_iso_14688_2005' => fn() => new SR_EN_ISO_14688_2005GranulometryClassifier(
+                GranulometryClassificationServiceContainer::create()
+            ),
+            'sr_en_iso_14688_2018' => fn() => new SR_EN_ISO_14688_2018GranulometryClassifier(
                 GranulometryClassificationServiceContainer::create()
             ),
         ];
