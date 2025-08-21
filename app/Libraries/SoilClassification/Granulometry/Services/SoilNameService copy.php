@@ -36,13 +36,12 @@ class SoilNameService
         $allFractions = $this->granulometryService->getAllFractionNames();
 
         $fractionsToAnalyze = array_diff(array_keys($allFractions), $this->granulometryService->expandGranulometricFractions($exclude));
-        // dd(array_keys($allFractions), $this->granulometryService->expandGranulometricFractions($exclude));
+
         if (empty($fractionsToAnalyze)) {
             return '';
         }
 
         $extractedFractions = $this->granulometryService->extractGranulometricFractions($granulometry, $fractionsToAnalyze);
-        // dd($allFractions, $fractionsToAnalyze, $extractedFractions);
 
         $activeFractions = array_filter($extractedFractions, fn($percentage) => $percentage > 0);
 

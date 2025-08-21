@@ -8,78 +8,69 @@ use App\Models\Granulometry;
 class GranulometryAnalysisService
 {
 
-    // private const COMPOSITE_FRACTIONS = [
-    //     'fine' => ['clay', 'silt'],
-    //     'coarse' => ['sand', 'gravel'],
-    //     'very_coarse' => ['cobble', 'boulder'],
-    //     'total_coarse' => ['sand', 'gravel', 'cobble', 'boulder']
-    // ];
+    private const COMPOSITE_FRACTIONS = [
+        'fine' => ['clay', 'silt'],
+        'coarse' => ['sand', 'gravel'],
+        'very_coarse' => ['cobble', 'boulder'],
+        'total_coarse' => ['sand', 'gravel', 'cobble', 'boulder']
+    ];
+    private const FRACTIONS = [
+        'clay' => 'Argilă',
+        'silt' => 'Praf',
+        'sand' => 'Nisip',
+        'gravel' => 'Pietriș',
+        'cobble' => 'Bolovăniș',
+        'boulder' => 'Blocuri'
+    ];
+    private const FRACTIONS_ = [
+        'clay' => [
+            'name' => 'Argilă',
+            'adjective' => ['argiloasă', 'argilos'],
+            'gender' => 0,
+        ],
+        'silt' => [
+            'name' => 'Praf',
+            'adjective' => ['prăfoasă', 'prăfos'],
+            'gender' => 1
+        ],
+        'sand' => [
+            'name' => 'Nisip',
+            'adjective' => ['nisipoasă', 'nisipos'],
+            'gender' => 1
+        ],
+        'gravel' => [
+            'name' => 'Pietriș',
+            'adjective' => ['cu pietriș', 'cu pietriș'],
+            'gender' => 1
+        ],
+        'cobble' => [
+            'name' => 'Bolovăniș',
+            'adjective' => ['cu bolovăniș', 'cu bolovăniș'],
+            'gender' => 1
+        ],
+        'boulder' => [
+            'name' => 'Blocuri',
+            'adjective' => ['cu blocuri', 'cu blocuri'],
+            'gender' => 1
+        ],
+    ];
 
-    // private const FRACTIONS = [
-    //     'clay' => [
-    //         'name' => 'Argilă',
-    //         'adjective' => ['argiloasă', 'argilos'],
-    //         'gender' => 0,
-    //         'class' => 'fine'
-    //     ],
-    //     'silt' => [
-    //         'name' => 'Praf',
-    //         'adjective' => ['prăfoasă', 'prăfos'],
-    //         'gender' => 1,
-    //         'class' => 'fine'
-    //     ],
-    //     'sand' => [
-    //         'name' => 'Nisip',
-    //         'adjective' => ['nisipoasă', 'nisipos'],
-    //         'gender' => 1,
-    //         'class' => 'coarse'
-    //     ],
-    //     'gravel' => [
-    //         'name' => 'Pietriș',
-    //         'adjective' => ['cu pietriș', 'cu pietriș'],
-    //         'gender' => 1,
-    //         'class' => 'coarse'
-    //     ],
-    //     'cobble' => [
-    //         'name' => 'Bolovăniș',
-    //         'adjective' => ['cu bolovăniș', 'cu bolovăniș'],
-    //         'gender' => 1,
-    //         'class' => 'very_coarse'
-    //     ],
-    //     'boulder' => [
-    //         'name' => 'Blocuri',
-    //         'adjective' => ['cu blocuri', 'cu blocuri'],
-    //         'gender' => 1,
-    //         'class' => 'very_coarse'
-    //     ],
-    // ];
 
-    private array $fractions;
-
-    public function __construct()
-    {
-        $this->fractions = config('granulometry.fractions');
-    }
 
     public function getAdjective(string $fraction, string $forFraction = ''): string
     {
         $for = $forFraction ?: 'clay';
 
-        return $this->fractions['simple_fractions'][$fraction]['adjective'][$this->fractions['simple_fractions'][$for]['gender']] ?? null;
+        return self::FRACTIONS_[$fraction]['adjective'][self::FRACTIONS_[$for]['gender']] ?? null;
     }
-
-
-    public function getFractionName(string $fraction) //: string
+    public function getFractionName(string $fraction): string
     {
-        // dd($this->fractions['simple_fractions'][$fraction]['name']);
-        return $this->fractions['simple_fractions'][$fraction]['name']
-            // return $this->fractions['simple_fractions'][$fraction]
-            ?? throw new \InvalidArgumentException("Unknown fraction: {$fraction}");
+        return self::FRACTIONS_[$fraction]['name'] ?? $fraction;
     }
 
     public function getAllFractionNames(): array
     {
-        return $this->fractions['simple_fractions'];
+        return self::FRACTIONS;
     }
 
     public function extractGranulometricFractions(Granulometry $granulometry, array $granulometricFractions): array
@@ -102,7 +93,7 @@ class GranulometryAnalysisService
         $expanded = [];
         foreach ($granulometricFractions as $fraction) {
             if ($this->isCompositeFraction($fraction)) {
-                foreach ($this->fractions['composite_fractions'][$fraction] as $component) {
+                foreach (self::COMPOSITE_FRACTIONS[$fraction] as $component) {
                     $expanded[] = $component;
                 }
             } else {
@@ -111,20 +102,21 @@ class GranulometryAnalysisService
         }
         return $expanded;
     }
+
     private function isCompositeFraction(string $fractionName): bool
     {
-        // return array_key_exists($fractionName, self::COMPOSITE_FRACTIONS);
-        return isset($this->fractions['composite_fractions'][$fractionName]);
+        return array_key_exists($fractionName, self::COMPOSITE_FRACTIONS);
     }
 
     private function calculateCompositeFractionValue(Granulometry $granulometry, string $compositeFractionName): float
     {
-        $components = $this->fractions['composite_fractions'][$compositeFractionName]['components'] ?? [];
+        $components = self::COMPOSITE_FRACTIONS[$compositeFractionName];
         $totalValue = 0;
 
         foreach ($components as $component) {
             $totalValue += $granulometry->{$component} ?? 0;
         }
+
         return $totalValue;
     }
 
@@ -175,12 +167,9 @@ class GranulometryAnalysisService
         $sand = $granulometry->sand ?? 0;
         $gravel = $granulometry->gravel ?? 0;
 
-        return $sand >= $gravel
+        return $sand >= $gravel && !$this->hasFineFraction($granulometry)
             ? ['sand' => $sand]
             : ['gravel' => $gravel];
-        // return $sand >= $gravel && !$this->hasFineFraction($granulometry)
-        //     ? ['sand' => $sand]
-        //     : ['gravel' => $gravel];
     }
 
     private function getDominantFineFraction(Granulometry $granulometry): array
@@ -203,13 +192,7 @@ class GranulometryAnalysisService
         //     'cobble' => $granulometry->cobble ?? 0,
         //     'boulder' => $granulometry->boulder ?? 0,
         // ];
-        // $fractions = $this->extractGranulometricFractions($granulometry, array_keys(self::FRACTIONS));
-
-        $fractions = $this->extractGranulometricFractions(
-            $granulometry,
-            array_keys($this->fractions['simple_fractions'])
-        );
-
+        $fractions = $this->extractGranulometricFractions($granulometry, array_keys(self::FRACTIONS));
         $dominantFraction = collect($fractions)
             ->sortByDesc(fn($percentage) => $percentage)
             ->keys()

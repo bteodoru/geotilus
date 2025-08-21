@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Inertia\Inertia;
 use App\Libraries\SoilClassification\Granulometry\Implementations\STAS_1243___1988;
+use App\Libraries\SoilClassification\Granulometry\Services\SoilNameService;
 use App\Libraries\SoilClassification\Services\CasagrandeChartService;
 use App\Libraries\SoilClassification\Services\GranulometryService;
 use App\Services\GeometryService;
@@ -35,8 +36,10 @@ use App\Libraries\SoilClassification\Plasticity\Classifiers\CasagrandeClassifier
 use App\Libraries\SoilClassification\Plasticity\PlasticityClassificationFactory;
 use App\Libraries\SoilClassification\Repositories\ClassificationSystemRepository;
 use App\Libraries\SoilClassification\Services\ClassificationSystemConfigurationService;
+use App\Libraries\SoilNaming\NamingConfiguration;
 use App\Libraries\SoilNaming\SoilNamingFactory;
 use App\Libraries\SoilNaming\SoilNamingResolver;
+use App\Libraries\SoilNaming\SoilNamingService;
 
 class SampleController extends BaseController
 {
@@ -454,6 +457,13 @@ class SampleController extends BaseController
 
     public function identify(Request $request)
     {
+        // $granulometry = ['clay' => 20, 'silt' => 30, 'sand' => 40, 'gravel' => 50, 'cobble' => 60, 'boulder' => 70];
+
+        // $model = new Granulometry();
+        // foreach ($granulometry as $property => $value) {
+        //     $model->{$property} = $value;
+        // }
+        // dd($model);
 
         // $clay = 10;
         $clay = $request->clay;
@@ -494,12 +504,24 @@ class SampleController extends BaseController
         try {
             // $soil = $soilIdentifier->classify();
             $soilIdentifier = $factory->create($system);
+            // $factory_p = new PlasticityClassificationFactory();
+            // $plasticity = $factory_p->create($system);
+            // $soil_ = $plasticity->classify($sample->plasticity);
             // dd($granulometry->toArray());
-            // dd($soilIdentifier->classify($sample->granulometry));
+            // dd($soilIdentifier->classify($sample));
+            // dd($soilIdentifier->classify($sample->granulometry), $soil_);
+            $soilName = new SoilNamingService(
+                $granulometryService,
+                app(NamingConfiguration::class),
+            );
+            // dd($soilName->buildSoilName(
+            //     $soilIdentifier->classify($sample),
+            // )->getFinalName());
             SoilType::updateOrCreate(
                 ['sample_id' => $request->sample],
                 [
-                    'name' => $soilIdentifier->classify($granulometry)->getSoilType(),
+                    // 'name' => $soilIdentifier->classify($sample)->getSoilType(),
+                    'name' => $soilName->buildSoilName($soilIdentifier->classify($sample))->getFinalName(),
                     'method' => $system
                 ]
             );

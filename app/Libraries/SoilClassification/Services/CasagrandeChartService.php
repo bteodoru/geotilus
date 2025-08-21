@@ -46,6 +46,8 @@ class CasagrandeChartService
         foreach ($chartDomains as $domain) {
             $analysis = $this->geometryService->analyzePointPosition([$x, $y], $domain['points']);
 
+            // echo "Analysis for domain {$domain['name']} at point ({$x}, {$y}): " . json_encode($analysis) . "\n";
+
             if ($analysis['is_inside']) {
                 // $definiteDomain = [
                 //     'classification_certainty' => 'definite',

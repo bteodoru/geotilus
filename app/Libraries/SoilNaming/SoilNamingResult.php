@@ -5,36 +5,38 @@ namespace App\Libraries\SoilNaming;
 class SoilNamingResult
 {
     public function __construct(
-        public string $soilName,
-        public string $namingMethod,
-        public array $standardInfo,
-        public ?object $granulometryResult = null,
-        public ?object $plasticityResult = null,
-        public float $confidence = 0.0,
-        public string $classificationCertainty = 'definite',
-        public array $metadata = []
+        private string $finalName,
+        private  $primaryFraction,
+        private array $furtherFractions,
+        // private array $tertiaryFractions,
+        private array $metadata
     ) {}
 
-    public function isAmbiguous(): bool
+    public function getFinalName(): string
     {
-        return $this->classificationCertainty === 'ambiguous';
+        return $this->finalName;
     }
 
-    public function requiresVerification(): bool
+    public function getPrimaryFraction(): string
     {
-        return $this->metadata['requires_verification'] ?? false;
+        return $this->primaryFraction;
+    }
+    public function getFurtherFractions(): array
+    {
+        return $this->furtherFractions;
+    }
+
+    public function getMetadata(): array
+    {
+        return $this->metadata;
     }
 
     public function toArray(): array
     {
         return [
-            'final_soil_name' => $this->soilName,
-            'classification_method' => $this->namingMethod,
-            'standard_info' => $this->standardInfo,
-            'granulometry_result' => $this->granulometryResult,
-            'plasticity_result' => $this->plasticityResult,
-            'confidence' => $this->confidence,
-            'classification_certainty' => $this->classificationCertainty,
+            'final_name' => $this->finalName,
+            'primary_fraction' => $this->primaryFraction,
+            'further_fractions' => $this->furtherFractions,
             'metadata' => $this->metadata
         ];
     }

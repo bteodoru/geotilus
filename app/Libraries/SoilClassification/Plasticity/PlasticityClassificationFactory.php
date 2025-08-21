@@ -2,7 +2,7 @@
 
 namespace App\Libraries\SoilClassification\Plasticity;
 
-use App\Libraries\SoilClassification\Contracts\PlasticityClassifierInterface;
+use App\Libraries\SoilClassification\Plasticity\Classifiers\STAS_1243_1988PlasticityClassifier;
 use App\Libraries\SoilClassification\Plasticity\Classifiers\CasagrandeClassifier;
 use App\Libraries\SoilClassification\Services\CasagrandeChartService;
 
@@ -15,10 +15,10 @@ class PlasticityClassificationFactory
         $this->registerClassifiers();
     }
 
-    public function create(string $standardCode): PlasticityClassifierInterface
+    public function create(string $standardCode) //: PlasticityClassifierInterface
     {
         if (!isset($this->classifiers[$standardCode])) {
-            throw new \InvalidArgumentException("Unknown granulometry standard: {$standardCode}");
+            throw new \InvalidArgumentException("Unknown plasticity standard: {$standardCode}");
         }
 
         $classifierFactory = $this->classifiers[$standardCode];
@@ -28,18 +28,18 @@ class PlasticityClassificationFactory
     private function registerClassifiers(): void
     {
         $this->classifiers = [
-            'casagrande' => function () {
+            'sr_en_iso_14688_2018' => function () {
                 return new CasagrandeClassifier(
                     app(CasagrandeChartService::class)
                 );
             },
-            // 'sr_en_iso_14688_2_2018' => function () {
-            //     return new SR_EN_ISO_14688_2_2018_Classifier();
-            // },
+            'stas_1243_1988' => function () {
+                return new STAS_1243_1988PlasticityClassifier();
+            },
         ];
     }
 
-    public function getClassifier(string $type): PlasticityClassifierInterface
+    public function getClassifier(string $type) //: PlasticityClassifierInterface
     {
         if (!isset($this->classifiers[$type])) {
             throw new \InvalidArgumentException("Unknown plasticity classifier type: {$type}");

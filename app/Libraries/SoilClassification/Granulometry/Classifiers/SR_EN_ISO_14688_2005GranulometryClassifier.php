@@ -2,34 +2,68 @@
 
 namespace App\Libraries\SoilClassification\Granulometry\Classifiers;
 
+use App\Libraries\DTOs\GranulometricFraction;
 use App\Libraries\PointInPolygon;
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassificationResult;
 use App\Libraries\SoilClassification\Granulometry\GranulometryClassifier;
 use App\Models\Granulometry;
+use App\Models\Sample;
 
 class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
 {
     protected string $systemCode = 'sr_en_iso_14688_2005';
+    protected $thresholds = [50, 25];
 
 
-    public function classify(Granulometry $granulometry): GranulometryClassificationResult
+
+    // public function classify_(Granulometry $granulometry) //: GranulometryClassificationResult
+    // {
+    //     $ternaryData = $this->processTernaryData($granulometry);
+    //     $soil = $this->determineSoilType($ternaryData['coordinates']);
+    //     $finalSoil = $this->analyze($granulometry, $soil, $ternaryData['normalizationFactor']);
+    //     // $soilName = $this->serviceContainer->soilName()
+    //     //     ->build($finalSoil['name'], $granulometry, $this->getRequiredTernaryFractions(), $this->thresholds);
+
+    //     return new GranulometryClassificationResult(
+    //         // primaryClassification: $soilName,
+    //         // primaryClassification: $finalSoil['name'],
+    //         // classificationSystem: $this->getSystemInfo(),
+    //         classificationSystem: $this->systemCode,
+    //         granulometry: $granulometry,
+    //         plasticity: [],
+    //         gradingParameters: [],
+    //         fractions: $finalSoil,
+    //         // soilType: $soilName,
+    //         // standardInfo: $this->getSystemInfo(),
+    //         metadata: $this->buildMetadata(
+    //             $granulometry,
+    //             $ternaryData['normalizationApplied'],
+    //             $ternaryData['normalizationFactor'],
+    //             $ternaryData['coordinates']
+    //         )
+    //     );
+    // }
+    public function classifyByTernaryDiagram(Sample $sample): GranulometricFraction
     {
+        $granulometry = $sample->granulometry;
         $ternaryData = $this->processTernaryData($granulometry);
         $soil = $this->determineSoilType($ternaryData['coordinates']);
         $finalSoil = $this->analyze($granulometry, $soil, $ternaryData['normalizationFactor']);
+        // $soilName = $this->serviceContainer->soilName()
+        //     ->build($finalSoil['name'], $granulometry, $this->getRequiredTernaryFractions(), $this->thresholds);
+        // return $finalSoil['name'];
+        // dd($ternaryData);
 
-        $soilName = $this->serviceContainer->soilName()
-            ->build($finalSoil['name'], $granulometry, $this->getRequiredTernaryFractions(), [50, 25]);
+        $components = array_map(function ($element) use ($ternaryData) {
+            return $element / $ternaryData['normalizationFactor'];
+        }, $ternaryData['coordinates']);
 
-        return new GranulometryClassificationResult(
-            soilType: $soilName,
-            standardInfo: $this->getSystemInfo(),
-            metadata: $this->buildMetadata(
-                $granulometry,
-                $ternaryData['normalizationApplied'],
-                $ternaryData['normalizationFactor'],
-                $ternaryData['coordinates']
-            )
+        return new GranulometricFraction(
+            name: $finalSoil['name'],
+            symbol: $soil['name'],
+            components: $components,
+            source: 'ternary_diagram',
+            label: $soil['name']
         );
     }
 

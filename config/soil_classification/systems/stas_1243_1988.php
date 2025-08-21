@@ -1,5 +1,6 @@
 <?php
 
+// config/soil_classification/systems/stas_1243_1988.php
 return [
     'system_info' => [
         'code' => 'stas_1243_1988',
@@ -16,8 +17,7 @@ return [
     'supported_classification_criteria' => [
         'granulometry' => [
             'applicable_granulometric_classes' => ['fine', 'coarse', 'very_coarse'],
-            'available_methods' => ['ternary_diagram'],
-            'primary_method' => 'ternary_diagram',
+            'graphical_method' => 'ternary_diagram', //sau 'none'
         ],
         'plasticity' => [
             'available_methods' => ['consistency_limits'],

@@ -16,6 +16,7 @@ return [
     'supported_classification_criteria' => [
         'granulometry' => [
             'applicable_granulometric_classes' => ['coarse', 'very_coarse'],
+            'graphical_method' => 'casagrande_chart',
             'available_methods' => ['ternary_diagram'],
             'primary_method' => 'ternary_diagram',
             'mandatory' => true,

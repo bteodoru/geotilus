@@ -65,6 +65,7 @@ class TernaryDiagramService
         // array $usedFractions
     ) //: CoordinateData
     {
+        // dd($requiredFractions);
         // $rawCoordinates = $this->extractCoordinateValues($granulometry, $requiredFractions);
         if ($this->shouldNormalize($granulometry, $requiredFractions)) {
             // return $this->normalizeCoordinates($usedFractions);
@@ -89,12 +90,10 @@ class TernaryDiagramService
 
     private function shouldNormalize(Granulometry $granulometry, array $requiredFractions): bool
     {
-        $allFractions = ['clay', 'silt', 'sand', 'gravel', 'cobble', 'boulder'];
-        // dd($granulometry->toArray(), $requiredFractions, $allFractions);
-        // $r = $this->granulometryAnalysisService->expandGranulometricFractions($requiredFractions);
-        // dd($r);
-        $unusedFractions = array_diff($allFractions, $this->granulometryAnalysisService->expandGranulometricFractions($requiredFractions));
-        // dd($unusedFractions, $granulometry->toArray());
+
+        $allFractions = array_keys($this->granulometryAnalysisService->getAllFractionNames());
+
+        $unusedFractions = array_diff($allFractions, array_keys($requiredFractions));
         foreach ($unusedFractions as $fraction) {
             if (($granulometry->{$fraction} ?? 0) > 0) {
                 return true;

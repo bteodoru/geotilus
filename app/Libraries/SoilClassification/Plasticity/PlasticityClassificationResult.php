@@ -42,7 +42,13 @@ class PlasticityClassificationResult
 
     public function getSoilType(): string
     {
-        return $this->soilType . ' cu plasticitate ' . $this->plasticity . ' (' . $this->soilCode . ')';
+        return $this->soilType;
+        // return $this->soilType . ' cu plasticitate ' . $this->plasticity . ' (' . $this->soilCode . ')';
+    }
+    public function getSoilCode(): string
+    {
+        return $this->soilCode;
+        // return $this->soilType . ' cu plasticitate ' . $this->plasticity . ' (' . $this->soilCode . ')';
     }
 
     public function isAmbiguous(): bool

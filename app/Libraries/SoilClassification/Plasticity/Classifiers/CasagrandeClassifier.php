@@ -33,7 +33,6 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
         }
 
 
-
         return new PlasticityClassificationResult(
             // plasticityClass: $domain['code'],
             soilType: $result['name'],
@@ -92,7 +91,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [35, 0]
                 ],
                 'plasticity' => 'redusă',
-                'name' => 'praf',
+                'name' => 'silt',
                 'color' => '#FDE272',
                 'labelOffset' => [0, 1],
             ],
@@ -105,7 +104,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [(4 + 0.73 * 20) / 0.73, 4]
                 ],
                 'plasticity' => 'redusă',
-                'name' => 'argilă-praf',
+                'name' => 'clay-silt',
                 'color' => '#8f6b29',
             ],
             [
@@ -117,7 +116,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [(7 + 0.73 * 20) / 0.73, 7]
                 ],
                 'plasticity' => 'redusă',
-                'name' => 'argilă',
+                'name' => 'clay',
                 'color' => '#D7D3D0',
             ],
             [
@@ -129,7 +128,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [50, 0]
                 ],
                 'plasticity' => 'medie',
-                'name' => 'praf',
+                'name' => 'silt',
                 'color' => '#FAC515',
             ],
             [
@@ -141,7 +140,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [50, 0.73 * (50 - 20)]
                 ],
                 'plasticity' => 'medie',
-                'name' => 'argilă',
+                'name' => 'clay',
                 'color' => '#A9A29D',
             ],
             [
@@ -153,7 +152,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [70, 0]
                 ],
                 'plasticity' => 'mare',
-                'name' => 'praf',
+                'name' => 'silt',
                 'color' => '#EAAA08',
             ],
             [
@@ -165,7 +164,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [70, 0.73 * (70 - 20)]
                 ],
                 'plasticity' => 'mare',
-                'name' => 'argilă',
+                'name' => 'clay',
                 'color' => '#79716B',
             ],
             [
@@ -177,7 +176,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [$lim, 0]
                 ],
                 'plasticity' => 'foarte mare',
-                'name' => 'praf',
+                'name' => 'silt',
                 'color' => '#CA8504',
             ],
             [
@@ -189,7 +188,7 @@ class CasagrandeClassifier implements PlasticityClassifierInterface
                     [$lim, 0.73 * ($lim - 20)]
                 ],
                 'plasticity' => 'foarte mare',
-                'name' => 'argilă',
+                'name' => 'clay',
                 'color' => '#57534E',
             ],
         ];

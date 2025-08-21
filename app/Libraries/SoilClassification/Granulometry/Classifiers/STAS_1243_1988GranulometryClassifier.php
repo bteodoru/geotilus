@@ -19,7 +19,9 @@ class STAS_1243_1988GranulometryClassifier extends GranulometryClassifier
     public function getGradationInformation(Granulometry $granulometry): ?string
     {
         $cu = $granulometry->cu;
-
+        if ($cu === null) {
+            return null;
+        }
         if ($cu < 5) {
             return 'foarte uniformă';
         } elseif ($cu <= 15) {
