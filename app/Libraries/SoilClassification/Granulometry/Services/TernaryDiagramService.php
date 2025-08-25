@@ -9,7 +9,10 @@ use App\Services\Granulometry\GranulometryAnalysisService;
 
 class TernaryDiagramService
 {
-    public function __construct(private GeometryService $geometryService, private GranulometryAnalysisService $granulometryAnalysisService) {}
+    public function __construct(
+        private GeometryService $geometryService,
+        private GranulometryAnalysisService $granulometryAnalysisService
+    ) {}
 
     public function findSoil(float $x, float $y, array $diagram): ?array
     {
@@ -35,7 +38,6 @@ class TernaryDiagramService
         if (isset($soilDomain['name'])) {
             return [
                 'name' => $soilDomain['name'],
-                // 'color' => $soilDomain['color'],
                 'cartesian_points' => $cartesianPoints
             ];
         }
@@ -62,28 +64,17 @@ class TernaryDiagramService
     public function prepareTernaryData(
         Granulometry $granulometry,
         array $requiredFractions,
-        // array $usedFractions
-    ) //: CoordinateData
-    {
+    ): array {
         // dd($requiredFractions);
-        // $rawCoordinates = $this->extractCoordinateValues($granulometry, $requiredFractions);
         if ($this->shouldNormalize($granulometry, $requiredFractions)) {
-            // return $this->normalizeCoordinates($usedFractions);
             return $this->normalizeCoordinates($requiredFractions);
         }
 
         return [
-            // 'coordinates' => $rawCoordinates,
             'coordinates' => $requiredFractions,
-            // 'coordinates' => $usedFractions,
             'normalizationApplied' => false,
             'normalizationFactor' => 1.0
         ];
-        // return new CoordinateData(
-        //     coordinates: new TernaryCoordinates(...$rawCoordinates),
-        //     normalizationApplied: false,
-        //     normalizationFactor: 1.0
-        // );
     }
 
 
@@ -103,18 +94,13 @@ class TernaryDiagramService
         return false;
     }
 
-    private function normalizeCoordinates(array $coordinates) //: CoordinateData
+    private function normalizeCoordinates(array $coordinates): array
     {
         $total = array_sum($coordinates);
         $factor = $total > 0 ? 100 / $total : 1.0;
 
         $normalizedCoordinates = array_map(fn($value) => $value * $factor, $coordinates);
 
-        // return new CoordinateData(
-        //     coordinates: new TernaryCoordinates(...$normalizedCoordinates),
-        //     normalizationApplied: true,
-        //     normalizationFactor: $factor
-        // );
         return [
             'coordinates' => $normalizedCoordinates,
             'normalizationApplied' => true,

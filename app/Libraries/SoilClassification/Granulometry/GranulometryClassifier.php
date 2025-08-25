@@ -10,13 +10,15 @@ use App\Models\Sample;
 
 abstract class GranulometryClassifier
 {
-    protected string $systemCode;
 
     public function __construct(
         protected GranulometryClassificationServiceContainer $serviceContainer
     ) {}
 
-
+    public static function getDependencies(): array
+    {
+        return [GranulometryClassificationServiceContainer::class];
+    }
 
     private function getAvailableCoarseFractions(Granulometry $granulometry, array $usedFractions): array
     {
@@ -69,12 +71,30 @@ abstract class GranulometryClassifier
         $fractions = array_merge($fractions, $coarseFractions);
 
         return new GranulometryClassificationResult(
-            classificationSystem: $this->systemCode,
+            classificationSystem: $this->getSystemCode(),
             granulometry: $sample->granulometry,
             plasticity: $sample->plasticity,
-            gradingParameters: [],
+            gradationInformation: $this->performGradationAnalysis($sample->granulometry),
             fractions: $fractions,
+
         );
+    }
+
+    private function performGradationAnalysis(Granulometry $granulometry): array
+    {
+        // $gradation = $granulometry->clay + $granulometry->silt > 50 ? null : $this->getGradation($granulometry);
+
+        if ($granulometry->clay + $granulometry->silt > 50) {
+            $gradation = null;
+        } else {
+            $gradation = $this->getGradation($granulometry);
+        }
+
+        return [
+            'gradation' => $gradation,
+            'Cu' => $granulometry->cu,
+            'Cc' => $granulometry->cc,
+        ];
     }
 
 
@@ -112,7 +132,7 @@ abstract class GranulometryClassifier
     public function getRequiredTernaryFractions(): array
     {
         try {
-            $diagram = $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->systemCode);
+            $diagram = $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->getSystemCode());
             return $diagram['metadata']['axes_order'];
         } catch (\Exception $e) {
             return [];
@@ -122,7 +142,7 @@ abstract class GranulometryClassifier
     private function isUsingTernaryDiagram(): bool
     {
         try {
-            $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->systemCode);
+            $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->getSystemCode());
             return true;
         } catch (\Exception $e) {
             return false;
@@ -161,16 +181,40 @@ abstract class GranulometryClassifier
 
     protected function getTernaryDiagram(): array
     {
-        $diagramConfig = $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->systemCode);
+        $diagramConfig = $this->serviceContainer->diagramRepository()->getDiagramForSystem($this->getSystemCode());
         return $diagramConfig['domains'];
     }
 
     public function getSystemInfo(): array
     {
-        $systemConfig = $this->serviceContainer->systemRepository()->findByCode($this->systemCode);
+        $systemConfig = $this->serviceContainer->systemRepository()->findByCode($this->getSystemCode());
         return $systemConfig['system_info'];
     }
 
+    public function getSystemCode(): string
+    {
+        $className = class_basename(static::class);
 
-    abstract public function getGradationInformation(Granulometry $granulometry): ?string;
+        // Elimină sufixul 'GranulometryClassifier'
+        $systemPart = substr($className, 0, -strlen('GranulometryClassifier'));
+
+        // Convertește din PascalCase în snake_case
+        return $this->convertToSnakeCase($systemPart);
+    }
+
+    /**
+     * Convertește din PascalCase în snake_case
+     */
+    private function convertToSnakeCase(string $input): string
+    {
+        // Inserează underscore înaintea cifrelor precedate de litere
+        $result = preg_replace('/([a-zA-Z])(\d)/', '$1_$2', $input);
+
+        // Inserează underscore înaintea literelor mari precedate de litere mici
+        $result = preg_replace('/([a-z])([A-Z])/', '$1_$2', $result);
+
+        return strtolower($result);
+    }
+
+    abstract public function getGradation(Granulometry $granulometry): ?string;
 }

@@ -11,8 +11,8 @@ use App\Models\Sample;
 
 class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
 {
-    protected string $systemCode = 'sr_en_iso_14688_2005';
-    protected $thresholds = [50, 25];
+    // protected string $systemCode = 'sr_en_iso_14688_2005';
+    // protected $thresholds = [50, 25];
 
 
 
@@ -114,8 +114,20 @@ class SR_EN_ISO_14688_2005GranulometryClassifier extends GranulometryClassifier
         return 'sr_en_iso_14688_2_two_stage_analysis';
     }
 
-    public function getGradationInformation(Granulometry $granulometry): ?string
+    public function getGradation(Granulometry $granulometry): ?string
     {
-        return '';
+        $cu = $granulometry->cu;
+        $cc = $granulometry->cc;
+
+        if ($cu === null || $cc === null) {
+            return null;
+        }
+        if ($cu > 15 && $cc >= 1 && $cc <= 3) {
+            return 'bine gradat';
+        } elseif ($cu >= 6 && $cu <= 15 && $cc < 1) {
+            return 'mediu gradat';
+        } else {
+            return 'rău gradat';
+        }
     }
 }

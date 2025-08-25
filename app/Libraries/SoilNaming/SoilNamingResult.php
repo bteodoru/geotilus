@@ -5,16 +5,16 @@ namespace App\Libraries\SoilNaming;
 class SoilNamingResult
 {
     public function __construct(
-        private string $finalName,
+        private string $soilName,
         private  $primaryFraction,
         private array $furtherFractions,
         // private array $tertiaryFractions,
         private array $metadata
     ) {}
 
-    public function getFinalName(): string
+    public function getSoilName(): string
     {
-        return $this->finalName;
+        return $this->soilName;
     }
 
     public function getPrimaryFraction(): string
@@ -34,7 +34,7 @@ class SoilNamingResult
     public function toArray(): array
     {
         return [
-            'final_name' => $this->finalName,
+            'final_name' => $this->soilName,
             'primary_fraction' => $this->primaryFraction,
             'further_fractions' => $this->furtherFractions,
             'metadata' => $this->metadata

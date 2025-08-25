@@ -8,7 +8,7 @@ use App\Models\Granulometry;
 class STAS_1243_1988GranulometryClassifier extends GranulometryClassifier
 {
 
-    protected string $systemCode = 'stas_1243_1988';
+    // protected string $systemCode = 'stas_1243_1988';
 
 
     protected function getClassificationMethod(): string
@@ -16,18 +16,18 @@ class STAS_1243_1988GranulometryClassifier extends GranulometryClassifier
         return 'stas_single_ternary_diagram';
     }
 
-    public function getGradationInformation(Granulometry $granulometry): ?string
+    public function getGradation(Granulometry $granulometry): ?string
     {
         $cu = $granulometry->cu;
         if ($cu === null) {
             return null;
         }
         if ($cu < 5) {
-            return 'foarte uniformă';
+            return 'foarte uniform';
         } elseif ($cu <= 15) {
-            return 'uniformă';
+            return 'uniform';
         } else {
-            return 'neuniformă';
+            return 'neuniform';
         }
     }
 }

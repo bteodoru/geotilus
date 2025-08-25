@@ -514,9 +514,9 @@ class SampleController extends BaseController
                 $granulometryService,
                 app(NamingConfiguration::class),
             );
-            // dd($soilName->buildSoilName(
-            //     $soilIdentifier->classify($sample),
-            // )->getFinalName());
+            dd($soilName->getSoilName(
+                $soilIdentifier->classify($sample),
+            ));
             SoilType::updateOrCreate(
                 ['sample_id' => $request->sample],
                 [

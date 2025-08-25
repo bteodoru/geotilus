@@ -14,9 +14,13 @@ class SoilNamingService
         private NamingConfiguration $config
     ) {}
 
-    public function buildSoilName(GranulometryClassificationResult $result): SoilNamingResult
+    public function getSoilName(GranulometryClassificationResult $result): SoilNamingResult
     {
+        // dd($result, $result->hasGradation());
         $fractions = $result->getFractions();
+        if ($result->hasGradation()) {
+            $gradationInfo = $result->getGradationInformation();
+        }
 
         if (empty($fractions)) {
             throw new InvalidArgumentException("No fractions available for naming");
@@ -29,10 +33,10 @@ class SoilNamingService
         $topFractions = array_slice($fractions, 0, 3);
 
         // Construiește denumirea
-        return $this->buildNameFromFractions($topFractions);
+        return $this->buildSoilName($topFractions, $gradationInfo['gradation'] ?? null);
     }
 
-    private function buildNameFromFractions(array $fractions): SoilNamingResult
+    private function buildSoilName(array $fractions, ?string $gradation = null): SoilNamingResult
     {
         $primary = $fractions[0];
         // $finalName = $primary->getName();
@@ -53,17 +57,18 @@ class SoilNamingService
             }
         }
 
-        $finalName = $this->buildFinalName($primary->getName(), $adjectives, $mentions);
+        $finalName = $this->buildFinalSoilName($primary->getName(), $adjectives, $mentions, $gradation);
 
         return new SoilNamingResult(
-            finalName: $finalName,
+            soilName: $finalName,
             primaryFraction: $primary,
             furtherFractions: array_slice($fractions, 1),
             metadata: [
                 'sorted_fractions' => array_map(fn($fraction) => [
                     $fraction->getLabel() => $fraction->getPercentage()
                 ], $fractions),
-                'configuration' => $this->config
+                'configuration' => $this->config,
+                // 'gradationInformation'
             ]
         );
     }
@@ -104,7 +109,7 @@ class SoilNamingService
         return $name;
     }
 
-    private function buildFinalName(string $primary, array $adjectives, array $mentions): string
+    private function buildFinalSoilName(string $primary, array $adjectives, array $mentions, ?string $gradation = null): string
     {
         $finalName = $primary;
 
@@ -116,6 +121,11 @@ class SoilNamingService
             $finalName .= ' ' . $this->config->getConnectors()['with'] . ' ' .
                 $this->formatMentionsList($mentions);
         }
+
+        if ($gradation) {
+            $finalName .= ' ' . $gradation;
+        }
+
 
         return $finalName;
     }

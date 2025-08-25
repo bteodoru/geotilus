@@ -23,7 +23,7 @@ class GranulometryClassificationResult
     private string $classificationSystem;
     private object $granulometry;
     private object $plasticity;
-    private array $gradingParameters;
+    private array $gradationInformation;
     private array $metadata;
     private array $fractions;
     // private array $primaryFraction;
@@ -35,7 +35,7 @@ class GranulometryClassificationResult
         string $classificationSystem,
         object $granulometry,
         object $plasticity,
-        array $gradingParameters = [],
+        array $gradationInformation = [],
         array $metadata = [],
         array $fractions = [],
         // array $primaryFraction = [],
@@ -46,7 +46,7 @@ class GranulometryClassificationResult
         $this->classificationSystem = $classificationSystem;
         $this->granulometry = $granulometry;
         $this->plasticity = $plasticity;
-        $this->gradingParameters = $gradingParameters;
+        $this->gradationInformation = $gradationInformation;
         $this->metadata = $metadata;
         $this->fractions = $fractions;
         // $this->primaryFraction = $primaryFraction;
@@ -124,9 +124,16 @@ class GranulometryClassificationResult
      * gradației, oferă informații despre comportamentul granular care
      * poate rafina denumirea finală.
      */
-    public function getGradingParameters(): array
+    public function getGradationInformation(): array
     {
-        return $this->gradingParameters;
+        return $this->gradationInformation;
+    }
+
+    public function hasGradation(): bool
+    {
+        return !empty($this->gradationInformation) &&
+            isset($this->gradationInformation['gradation']) &&
+            $this->gradationInformation['gradation'] !== null;
     }
 
     /**
@@ -198,7 +205,7 @@ class GranulometryClassificationResult
             'classification_system' => $this->classificationSystem,
             'granulometry' => $this->granulometry,
             'plasticity' => $this->plasticity,
-            'grading_parameters' => $this->gradingParameters,
+            'grading_parameters' => $this->gradationInformation,
             'classification_metadata' => $this->metadata
         ];
     }

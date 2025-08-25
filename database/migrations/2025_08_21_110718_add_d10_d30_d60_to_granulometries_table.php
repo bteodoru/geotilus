@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('granulometries', function (Blueprint $table) {
-            $table->float('cu', 5, 2)->after('boulder')->nullable();
-            $table->float('cc', 5, 2)->after('boulder')->nullable();
+            $table->decimal('d10', 10, 6)->after('boulder')->nullable();
+            $table->decimal('d30', 10, 6)->after('d10')->nullable();
+            $table->decimal('d60', 10, 6)->after('d30')->nullable();
         });
     }
 
@@ -27,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('granulometries', function (Blueprint $table) {
-            //
+            $table->dropColumn(['d10', 'd30', 'd60']);
         });
     }
 };

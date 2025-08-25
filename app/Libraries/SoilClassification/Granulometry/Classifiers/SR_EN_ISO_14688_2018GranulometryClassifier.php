@@ -12,7 +12,7 @@ use App\Models\Sample;
 
 class SR_EN_ISO_14688_2018GranulometryClassifier extends GranulometryClassifier
 {
-    protected string $systemCode = 'sr_en_iso_14688_2018';
+    // protected string $systemCode = 'sr_en_iso_14688_2018';
 
     protected function getClassificationMethod(): string
     {
@@ -23,7 +23,7 @@ class SR_EN_ISO_14688_2018GranulometryClassifier extends GranulometryClassifier
     {
         // dd($sample->granulometry);
         $plasticityFactory = new PlasticityClassificationFactory();
-        $plasticityClassifier = $plasticityFactory->create($this->systemCode);
+        $plasticityClassifier = $plasticityFactory->create($this->getSystemCode());
         $soil = $plasticityClassifier->classify($sample->plasticity);
 
         return new GranulometricFraction(
@@ -31,26 +31,29 @@ class SR_EN_ISO_14688_2018GranulometryClassifier extends GranulometryClassifier
             label: $soil->getSoilType(),
             components: ['clay' => $sample->granulometry->clay, 'silt' => $sample->granulometry->silt],
             source: 'casagrande_chart',
-            class: 'fine'
+            class: 'fine',
+
+
         );
     }
 
-    public function getGradationInformation(Granulometry $granulometry): ?string
+    public function getGradation(Granulometry $granulometry): ?string
     {
         $cu = $granulometry->cu;
+        $cc = $granulometry->cc;
 
-        if ($cu === null) {
+        if ($cu === null || $cc === null) {
             return null;
         }
 
-        if ($cu < 3) {
-            return 'foarte uniformă';
-        } elseif ($cu <= 6) {
-            return 'uniformă';
-        } elseif ($cu <= 15) {
+        if ($cu < 3 && $cc < 1) {
+            return 'foarte uniform';
+        } elseif ($cu <= 6 && $cc < 1) {
+            return 'uniform';
+        } elseif ($cu <= 15 && $cc >= 1 && $cc <= 3) {
             return 'cu uniformitate medie';
         } else {
-            return 'neuniformă';
+            return 'neuniform';
         }
     }
 }
